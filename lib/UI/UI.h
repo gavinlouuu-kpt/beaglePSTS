@@ -26,12 +26,13 @@ void buildPWMsgBox();
 void text_input_event_cb(lv_event_t *e);
 void makeKeyboard();
 void popupMsgBox(String title, String msg);
-void updateLocalTime();
+
 
 void networkCheck();
 void wifiCheckTask(void *pvParameters);
-void check_upload_status(lv_timer_t *timer);
 
+void check_upload_status(lv_timer_t *timer);
+void updateLocalTime();
 
 
 #endif // UI_h

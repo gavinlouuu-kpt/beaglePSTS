@@ -205,30 +205,10 @@ void wifiCheckTask(void *pvParameters) {
   for (;;) {
     if (WiFi.status() != WL_CONNECTED) {
       Serial.println("WiFi connection lost.");
-      // networkStatus = NETWORK_CONNECT_FAILED; // Update status to reflect the lost connection
-      // Optionally, attempt to reconnect here or signal another task to handle reconnection
-      WiFi.disconnect();
-      // WiFi.begin(ssidName.c_str(), ssidPW.c_str());
-
-      // unsigned long reconnectStartTime = millis();
-      // while (WiFi.status() != WL_CONNECTED && (millis() - reconnectStartTime) < networkTimeout) {
-      //   vTaskDelay(pdMS_TO_TICKS(250)); // Wait a bit before retrying
-      // }
-
-      // if (WiFi.status() == WL_CONNECTED) {
-      //   Serial.println("Reconnected to WiFi.");
-      //   networkStatus = NETWORK_CONNECTED; // Update status to reflect successful reconnection
-      //   // Optionally, reinitialize any network-dependent services here
-      // } else {
-      //   Serial.println("Failed to reconnect to WiFi.");
-      //   // Handle continued failure to reconnect
-      // }
+      // WiFi.disconnect();
     } else {
-      // WiFi is connected; no action needed, just print status or perform other checks
-      Serial.println("Wifi still good.");
       // networkStatus = NETWORK_CONNECTED; // Confirm that we are still connected
       fbKeepAlive();
-
     }
     vTaskDelay(pdMS_TO_TICKS(10000)); // Check every 10 seconds
   }
