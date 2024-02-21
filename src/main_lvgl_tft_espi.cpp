@@ -133,7 +133,7 @@ void lv_example_btn_1(void)
 
 
 #define CALIBRATION_FILE "/TouchCalData1"
-#define REPEAT_CAL false
+#define REPEAT_CAL true
 
 void touch_calibrate()
 {

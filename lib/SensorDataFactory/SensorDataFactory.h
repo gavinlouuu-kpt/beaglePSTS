@@ -10,6 +10,8 @@ public:
 private:
     static void performSampling(std::vector<int>& conVec, std::vector<int>& dataVec);
     static int dummyData();
+    static int breath_check();
+    static void sample_collection();
 };
 
 #endif // SENSOR_DATA_FACTORY_H

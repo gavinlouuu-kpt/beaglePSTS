@@ -19,4 +19,12 @@ const int SPI3_CLK = 4; // SPI3 clock
 const int LCD_RST = 2; // LCD reset
 const int TCH_CS = 15; // Touch chip select
 
+const int PumpPWM = 0; // PWM channel for pump
+const int HeaterPWM = 1; // PWM channel for heater
+const int SolenoidPWM = 2; // PWM channel for solenoid valve
+const int PumpFREQ = 20000;
+const int HeaterFREQ = 20000;
+const int SolenoidFREQ = 20000;
+const int pwmRES = 8;
+
 #endif // PINCONFIG_H

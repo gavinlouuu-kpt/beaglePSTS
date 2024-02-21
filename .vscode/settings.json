@@ -1,3 +1,6 @@
 {
-    "cmake.sourceDirectory": "/Users/gavinlou/Developer/beaglePSTS/.pio/libdeps/esp32dev/Unity"
+    "cmake.sourceDirectory": "/Users/gavinlou/Developer/beaglePSTS/.pio/libdeps/esp32dev/Unity",
+    "files.associations": {
+        "chrono": "cpp"
+    }
 }
