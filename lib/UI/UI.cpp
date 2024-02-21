@@ -204,7 +204,7 @@ void networkCheck(){
 void wifiCheckTask(void *pvParameters) {
   for (;;) {
     if (WiFi.status() != WL_CONNECTED) {
-      Serial.println("WiFi connection lost.");
+      // Serial.println("WiFi connection lost.");
       // WiFi.disconnect();
     } else {
       // networkStatus = NETWORK_CONNECTED; // Confirm that we are still connected

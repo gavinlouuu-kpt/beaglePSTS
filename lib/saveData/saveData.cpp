@@ -316,7 +316,7 @@ void firebaseSetup(){
 
 void fbKeepAlive(){
     fbdo.keepAlive(5, 5, 1);
-    Serial.println(fbdo.httpConnected() ? "firebase connected" : "firebase not connected");
+    // Serial.println(fbdo.httpConnected() ? "firebase connected" : "firebase not connected");
 }
 
 void localRead(){
