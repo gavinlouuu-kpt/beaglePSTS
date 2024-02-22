@@ -11,6 +11,20 @@
 #include <chrono>
 #include <algorithm> // For std::copy
 
+bool SensorDataFactory::bme_begin() {
+    if (!bme.begin()) {
+        Serial.println("Could not find a valid BME680 sensor, check wiring!");
+        return false;
+    }
+    bme.setTemperatureOversampling(BME680_OS_8X);
+    bme.setHumidityOversampling(BME680_OS_2X);
+    bme.setPressureOversampling(BME680_OS_4X);
+    bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
+    bme.setGasHeater(320, 10); // 320*C for 150 ms
+    return true;
+}
+
+
 int SensorDataFactory::breath_check(){
     auto start_time = std::chrono::steady_clock::now(); // Record start time for timeout check
     auto previoustime = std::chrono::steady_clock::now();
@@ -47,9 +61,27 @@ int SensorDataFactory::breath_check(){
     }
 }
 
+void SensorDataFactory::preSampling(){
+    ledcWrite(PumpPWM, 155); // turn on pump
+    if (!bme_begin()) {
+        Serial.println("Failed to initialize BME680 sensor.");
+        return;
+    }
+    // create a timer for 30 seconds to let the sensor warmup
+    auto start = std::chrono::steady_clock::now();
+    auto end = start + std::chrono::seconds(30);
+    Serial.print("Warming up sensor: ");
+    while(std::chrono::steady_clock::now() < end){
+        Serial.print(".");
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 
+}
 
+void SensorDataFactory::postSampling(){
+    ledcWrite(PumpPWM, 0); // turn off pump
 
+}
 
 
 int SensorDataFactory::dummyData(){
@@ -58,34 +90,75 @@ int SensorDataFactory::dummyData(){
     return random;
 }
 
-void SensorDataFactory::performSampling(std::vector<int>& conVec, std::vector<int>& dataVec) {
+void SensorDataFactory::performSampling(std::vector<float>& conVec, std::vector<uint32_t>& dataVec) {
     using namespace std::chrono;
-// record initial condition
-    for(int i = 0; i < 5; ++i){
-        conVec.push_back(dummyData());
+    preSampling();
+    // if (!bme_begin()) {
+    //     Serial.println("Failed to initialize BME680 sensor.");
+    //     return;
+    // }
+
+// record initial condition    
+    if(bme.performReading()){
+        conVec.push_back(bme.temperature);
+        conVec.push_back(bme.humidity);
+        conVec.push_back(bme.pressure);
     }
+    
 
 //create a loop for a minute where dummyData is called every 60ms 
     auto start = steady_clock::now();
     auto end = start + seconds(60);
     dataVec.clear(); // Make sure it's empty before filling
     while(steady_clock::now() < end){
-        dataVec.push_back(dummyData());
+        if(bme.performReading()){
+        dataVec.push_back(bme.gas_resistance);
         Serial.print(".");
-        std::this_thread::sleep_for(std::chrono::milliseconds(60));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(60));
+        }
     }
+    auto now = std::chrono::steady_clock::now();
+    std::chrono::duration<float> duration = now - start;
 
-// record ending condition
-    for(int i = 0; i < 5; ++i){
-        conVec.push_back(dummyData());
+// record ending condition // no blocking
+    if(bme.performReading()){
+        conVec.push_back(bme.temperature);
+        conVec.push_back(bme.humidity);
+        conVec.push_back(bme.pressure);
+        conVec.push_back(duration.count() * 1000); // Convert duration to milliseconds
     }
+    postSampling();
 
 }
 
+// void SensorDataFactory::performSampling(std::vector<int>& conVec, std::vector<int>& dataVec) {
+//     using namespace std::chrono;
+// // record initial condition
+//     for(int i = 0; i < 5; ++i){
+//         conVec.push_back(dummyData());
+//     }
+
+// //create a loop for a minute where dummyData is called every 60ms 
+//     auto start = steady_clock::now();
+//     auto end = start + seconds(60);
+//     dataVec.clear(); // Make sure it's empty before filling
+//     while(steady_clock::now() < end){
+//         dataVec.push_back(dummyData());
+//         Serial.print(".");
+//         std::this_thread::sleep_for(std::chrono::milliseconds(60));
+//     }
+
+// // record ending condition
+//     for(int i = 0; i < 5; ++i){
+//         conVec.push_back(dummyData());
+//     }
+
+// }
+
 SensorData SensorDataFactory::createSensorData() {
     std::string infoString = "T_s, RH_s, Pa_s, T_e, RH_e,Pa_e, t_ms";
-    std::vector<int> conVec;
-    std::vector<int> dataVec;
+    std::vector<float> conVec;
+    std::vector<uint32_t> dataVec;
     performSampling(conVec, dataVec);
     return SensorData(infoString, conVec, dataVec);
 }

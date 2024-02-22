@@ -401,21 +401,15 @@ volatile bool uploadInProgress = false;
 void dataFF(void *pvParameters){
     Serial.println("Enter dataFF");
     uploadInProgress = true;
-    SensorData sensorData = SensorDataFactory::createSensorData();
-    // std::string InfoString = sensorData.getInfoString();
-    // std::vector<int> DataVec = sensorData.getDataVec();
-    // std::vector<int> conVec = sensorData.getConVec();
-    // fireGetSample(InfoString, conVec, DataVec);
-    Serial.println(fbdo.httpConnected() ? "Before .ready firebase connected" : "Before .ready firebase not connected");
+    SensorDataFactory factory;
+    SensorData sensorData = factory.createSensorData();
+    
     if (Firebase.ready() && (millis() - dataMillis > 30000 || dataMillis == 0))
     {
         
         dataMillis = millis();
-        Serial.println("Enter firebase loop...");
-
             // For the usage of FirebaseJson, see examples/FirebaseJson/BasicUsage/Create_Edit_Parse/Create_Edit_Parse.ino
             FirebaseJson content;
-
             std::string macAddressTest = WiFi.macAddress().c_str();
             // obtain date
             struct tm timeinfo;
@@ -434,28 +428,19 @@ void dataFF(void *pvParameters){
             std::string info = jsonKey + "/mapValue/fields/info/stringValue";
             std::string condition = jsonKey + "/mapValue/fields/condition/stringValue";
             std::string data = jsonKey + "/mapValue/fields/data/stringValue";
-            // Serial.println("Setting JSON Key...");	
+            
             std::string infoString = sensorData.getInfoString();
-            // Serial.println("converting sensorData to InfoString...");
-            std::string conString = vectorToString(sensorData.getConVec()); // This is your vector as a string
-            // Serial.println("converting sensorData to ConVecString...");
-            std::string dataString = vectorToString(sensorData.getDataVec()); // This is your vector as a string            
-            // Serial.println("converting sensorData to DataString...");
-
+            std::string conString = vectorToString(sensorData.getConVec()); 
+            std::string dataString = vectorToString(sensorData.getDataVec()); 
+            
             content.set(info, infoString.c_str());
-            // Serial.println("Setting sensorData to InfoString...");
             content.set(condition, conString.c_str());
-            // Serial.println("Setting sensorData to ConVecString...");
             content.set(data, dataString.c_str());
-            // Serial.println("Setting sensorData to DataString...");
-
             // info is the collection id, countries is the document id in collection info.
             std::string documentPath = macAddressTest + "/" + today;
 
             // Here's the critical part: specify the new field in the updateMask
             std::string updateMask = std::string("t") + currentTime; // This is "fields/<currentTime>"
-            
-            
             
             if (Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, documentPath.c_str(), content.raw(), updateMask /* updateMask */))
                 Serial.println("ok");
@@ -470,115 +455,3 @@ void dataFF(void *pvParameters){
     Serial.println(uxHighWaterMark);
     vTaskDelete(fsUploadTaskHandler);
 }
-
-// void fireGetSample(const std::string& infoString, const std::vector<int>& conVec, const std::vector<int>& dataVec){
-//     if (Firebase.ready() && (millis() - dataMillis > 30000 || dataMillis == 0))
-//     {
-//         dataMillis = millis();
-
-//             // For the usage of FirebaseJson, see examples/FirebaseJson/BasicUsage/Create_Edit_Parse/Create_Edit_Parse.ino
-//             FirebaseJson content;
-
-//             std::string macAddressTest = WiFi.macAddress().c_str();
-//             // obtain date
-//             struct tm timeinfo;
-//             if (!getLocalTime(&timeinfo)) {
-//                 Serial.println("Failed to obtain time");
-//                 return;
-//             }
-
-//             char today[11]; // Buffer to hold the date string
-//             strftime(today, sizeof(today), "%Y-%m-%d", &timeinfo); // Format: YYYY-MM-DD
-
-//             char currentTime[9]; // Buffer to hold the time string
-//             strftime(currentTime, sizeof(currentTime), "%H_%M_%S", &timeinfo); // Format: HH:MM:SS
-
-//             std::string jsonKey = std::string("fields/t") + currentTime;
-//             std::string info = jsonKey + "/mapValue/fields/info/stringValue";
-//             std::string condition = jsonKey + "/mapValue/fields/condition/stringValue";
-//             std::string data = jsonKey + "/mapValue/fields/data/stringValue";
-            
-//             std::string conString = vectorToString(conVec); // This is your vector as a string
-//             std::string dataString = vectorToString(dataVec); // This is your vector as a string            
-
-//             content.set(info, infoString.c_str());
-//             content.set(condition, conString.c_str());
-//             content.set(data, dataString.c_str());
-
-//             // info is the collection id, countries is the document id in collection info.
-//             std::string documentPath = macAddressTest + "/" + today;
-
-//             // Here's the critical part: specify the new field in the updateMask
-//             std::string updateMask = std::string("t") + currentTime; // This is "fields/<currentTime>"
-            
-//             if (Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, documentPath.c_str(), content.raw(), updateMask /* updateMask */))
-//                 Serial.println("ok");
-//             else
-//                 Serial.println(fbdo.errorReason());
-//         }
-//     }
-
-
-//------------------------------------------------------ linear programming
-
-// void dataFF(){
-//     SensorData sensorData = SensorDataFactory::createSensorData();
-//     std::string InfoString = sensorData.getInfoString();
-//     std::vector<int> DataVec = sensorData.getDataVec();
-//     std::vector<int> conVec = sensorData.getConVec();
-//     fireGetSample(InfoString, conVec, DataVec);
-// }
-
-// void fireGetSample(const std::string& infoString, const std::vector<int>& conVec, const std::vector<int>& dataVec){
-//     if (Firebase.ready() && (millis() - dataMillis > 30000 || dataMillis == 0))
-//     {
-//         dataMillis = millis();
-
-//             // For the usage of FirebaseJson, see examples/FirebaseJson/BasicUsage/Create_Edit_Parse/Create_Edit_Parse.ino
-//             FirebaseJson content;
-
-//             std::string macAddressTest = WiFi.macAddress().c_str();
-//             // obtain date
-//             struct tm timeinfo;
-//             if (!getLocalTime(&timeinfo)) {
-//                 Serial.println("Failed to obtain time");
-//                 return;
-//             }
-
-//             char today[11]; // Buffer to hold the date string
-//             strftime(today, sizeof(today), "%Y-%m-%d", &timeinfo); // Format: YYYY-MM-DD
-
-//             char currentTime[9]; // Buffer to hold the time string
-//             strftime(currentTime, sizeof(currentTime), "%H_%M_%S", &timeinfo); // Format: HH:MM:SS
-
-//             std::string jsonKey = std::string("fields/t") + currentTime;
-//             std::string info = jsonKey + "/mapValue/fields/info/stringValue";
-//             std::string condition = jsonKey + "/mapValue/fields/condition/stringValue";
-//             std::string data = jsonKey + "/mapValue/fields/data/stringValue";
-            
-//             // std::string infoString = "Temp,eTemp,RH,eRH,dur";
-//             // std::vector<int> conVec = {25,35,75,77,10004};
-//             // std::vector<int> dataVec = {5000, 5002, 5003, 5004, 5005};
-            
-//             std::string conString = vectorToString(conVec); // This is your vector as a string
-//             std::string dataString = vectorToString(dataVec); // This is your vector as a string            
-
-//             content.set(info, infoString.c_str());
-//             content.set(condition, conString.c_str());
-//             content.set(data, dataString.c_str());
-
-//             // info is the collection id, countries is the document id in collection info.
-//             std::string documentPath = macAddressTest + "/" + today;
-//             // Serial.println("documentPath:");
-//             // Serial.println(documentPath.c_str());
-
-//             // Here's the critical part: specify the new field in the updateMask
-//             std::string updateMask = std::string("t") + currentTime; // This is "fields/<currentTime>"
-            
-//             if (Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, documentPath.c_str(), content.raw(), updateMask /* updateMask */))
-//                 Serial.println("ok");
-//             else
-//                 Serial.println(fbdo.errorReason());
-//         }
-//     }
-

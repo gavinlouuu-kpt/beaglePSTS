@@ -1,6 +1,8 @@
 #include <Arduino.h>
+#include <Wire.h>
 #include <LittleFS.h>
 #include <FS.h>
+#include <pinConfig.h>
 
 #include <FirebaseJson.h>
 #include <SD.h>
@@ -11,6 +13,7 @@
 #include <saveData.h>
 #include <map>
 #include <vector>
+#include <Hardware.h>
 // #include <beagleCLI.h>
 // #include <Network.h>
 #include <UI.h>
@@ -206,13 +209,9 @@ void touch_calibrate()
 void setup()
 {
     Serial.begin( 115200 ); /* prepare for possible serial debug */
-    String LVGL_Arduino = "Hello Arduino! ";
-    LVGL_Arduino += String('V') + lv_version_major() + "." + lv_version_minor() + "." + lv_version_patch();
-
-    Serial.println( LVGL_Arduino );
-    Serial.println( "I am LVGL_Arduino" );
-
-    
+    Wire.begin(C_SDA, C_SCL);
+    pinSetup();
+    pwmSetup();
 
 #if LV_USE_LOG != 0
     lv_log_register_print_cb( my_print ); /* register print function for debugging */
