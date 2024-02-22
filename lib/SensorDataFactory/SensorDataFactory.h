@@ -13,6 +13,8 @@ class SensorDataFactory {
 public:
     SensorData createSensorData();
     Adafruit_BME680 bme; // I2C
+    void dataStream();
+
 private:
     void performSampling(std::vector<float>& conVec, std::vector<uint32_t>& dataVec);
     static int dummyData();

@@ -219,6 +219,7 @@ void wifiCheckTask(void *pvParameters) {
 
 void timerForNetwork(lv_timer_t *timer) {
   LV_UNUSED(timer);
+  // Serial.println(networkStatus);
 
   switch (networkStatus) {
 
@@ -229,7 +230,7 @@ void timerForNetwork(lv_timer_t *timer) {
     case NETWORK_CONNECTED_POPUP:
       popupMsgBox("WiFi Connected!", "Now you'll get the current time soon.");
       networkStatus = NETWORK_CONNECTED;
-      configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+      configTime(gmtOffset_sec, daylightOffset_sec, ntpServer,"asia.pool.ntp.org","time.nist.gov");
       break;
 
     case NETWORK_CONNECTED:
@@ -280,7 +281,7 @@ void buildBody() {
   lv_obj_add_flag(spinner_warm, LV_OBJ_FLAG_HIDDEN);
   // warm label
   lv_obj_t *label_warm = lv_label_create(bodyScreen); /*Add a label to the spinner*/
-  lv_label_set_text(label_warm, "Ready");  /*Set the labels text*/
+  lv_label_set_text(label_warm, "1. Ready");  /*Set the labels text*/
   lv_obj_align(label_warm, LV_ALIGN_CENTER, -90, -75);
   
   spinner_huff = lv_spinner_create(lv_scr_act(), 1000, 50);
@@ -290,7 +291,7 @@ void buildBody() {
   lv_obj_add_flag(spinner_huff, LV_OBJ_FLAG_HIDDEN);
   // huff label
   lv_obj_t *label_huff = lv_label_create(bodyScreen); /*Add a label to the spinner*/
-  lv_label_set_text(label_huff, "Huff");  /*Set the labels text*/
+  lv_label_set_text(label_huff, "2. Huff");  /*Set the labels text*/
   lv_obj_align(label_huff, LV_ALIGN_CENTER, 0, -75);
 
   spinner_save = lv_spinner_create(lv_scr_act(), 1000, 50);
@@ -300,7 +301,7 @@ void buildBody() {
   lv_obj_add_flag(spinner_save, LV_OBJ_FLAG_HIDDEN);
   // save label
   lv_obj_t *label_save = lv_label_create(bodyScreen); /*Add a label to the button*/
-  lv_label_set_text(label_save, "Save");  /*Set the labels text*/
+  lv_label_set_text(label_save, "3. Save");  /*Set the labels text*/
   lv_obj_align(label_save, LV_ALIGN_CENTER, 90, -75);
 
   // action button
