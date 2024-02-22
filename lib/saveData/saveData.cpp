@@ -389,7 +389,7 @@ TaskHandle_t fsUploadTaskHandler;
 void firestoreUpload() {
   xTaskCreate(dataFF,
               "dataTask",
-              16384, //131072,
+              16384,
               NULL,
               1,
               &fsUploadTaskHandler);
@@ -400,13 +400,13 @@ volatile bool uploadInProgress = false;
 
 void dataFF(void *pvParameters){
     Serial.println("Enter dataFF");
-    uploadInProgress = true;
+    
     SensorDataFactory factory;
     SensorData sensorData = factory.createSensorData();
     
     if (Firebase.ready() && (millis() - dataMillis > 30000 || dataMillis == 0))
     {
-        
+        uploadInProgress = true;
         dataMillis = millis();
             // For the usage of FirebaseJson, see examples/FirebaseJson/BasicUsage/Create_Edit_Parse/Create_Edit_Parse.ino
             FirebaseJson content;

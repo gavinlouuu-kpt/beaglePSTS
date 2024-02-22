@@ -23,7 +23,6 @@ std::map<String, std::function<void()>> commandMap;
 
 #include <Firebase_ESP_Client.h>
 
-// #include <addons/TokenHelper.h>
 // WiFiManager wifiManager;
 
 
@@ -31,13 +30,7 @@ std::map<String, std::function<void()>> commandMap;
 // #include <lv_demos.h>
 #include <TFT_eSPI.h>
 #include "FS.h"
-
 #include <SPI.h>
-
-/*To use the built-in examples and demos of LVGL uncomment the includes below respectively.
- *You also need to copy `lvgl/examples` to `lvgl/src/examples`. Similarly for the demos `lvgl/demos` to `lvgl/src/demos`.
- Note that the `lv_examples` library is for LVGL v7 and you shouldn't install it for this version (since LVGL v8)
- as the examples and demos are now part of the main LVGL library. */
 
 /*Change to your screen resolution that is after rotation*/
 static const uint16_t screenWidth  = 320;
@@ -46,7 +39,6 @@ static const uint16_t screenHeight = 240;
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf[ screenWidth * screenHeight / 10 ];
 
-// TFT_eSPI tft = TFT_eSPI(screenWidth, screenHeight); /* TFT instance */
 TFT_eSPI tft;
 
 #if LV_USE_LOG != 0
@@ -136,7 +128,7 @@ void lv_example_btn_1(void)
 
 
 #define CALIBRATION_FILE "/TouchCalData1"
-#define REPEAT_CAL true
+#define REPEAT_CAL false
 
 void touch_calibrate()
 {

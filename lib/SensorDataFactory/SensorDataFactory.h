@@ -6,6 +6,9 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME680.h>
 
+extern volatile bool warmingInProgress;
+extern volatile bool samplingInProgress;
+
 class SensorDataFactory {
 public:
     SensorData createSensorData();

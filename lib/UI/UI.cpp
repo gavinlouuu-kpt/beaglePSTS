@@ -6,6 +6,7 @@
 #include "time.h"
 #include "TFT_eSPI.h"
 #include "saveData.h"
+#include "SensorDataFactory.h"
 
 #include "time.h"
 // const char *ntpServer = "pool.ntp.org";
@@ -32,7 +33,9 @@ lv_obj_t *timeLabel;
 lv_obj_t *settings;
 lv_obj_t *settingBtn;
 lv_obj_t *db_settingBtn;
-lv_obj_t *spinner;
+lv_obj_t *spinner_warm;
+lv_obj_t *spinner_huff;
+lv_obj_t *spinner_save;
 lv_obj_t *settingCloseBtn;
 lv_obj_t *settingWiFiSwitch;
 lv_obj_t *wfList;
@@ -269,17 +272,41 @@ void buildBody() {
   lv_obj_set_size(bodyScreen, tft.width(), tft.height() - 34); //-34
   lv_obj_align(bodyScreen, LV_ALIGN_BOTTOM_MID, 0, 0);
 
-  
-  spinner = lv_spinner_create(lv_scr_act(), 1000, 60);
-  lv_obj_add_event_cb(spinner, db_btn_event_cb, LV_EVENT_ALL, NULL);
-  lv_obj_set_size(spinner, 100, 100);
-  lv_obj_center(spinner);
-  lv_obj_align(spinner, LV_ALIGN_CENTER, 0, -10);
-  lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
 
+  spinner_warm = lv_spinner_create(lv_scr_act(), 1000, 50);
+  lv_obj_add_event_cb(spinner_warm, db_btn_event_cb, LV_EVENT_ALL, NULL);
+  lv_obj_set_size(spinner_warm, 70, 70);
+  lv_obj_align(spinner_warm, LV_ALIGN_CENTER, -90, 5);
+  lv_obj_add_flag(spinner_warm, LV_OBJ_FLAG_HIDDEN);
+  // warm label
+  lv_obj_t *label_warm = lv_label_create(bodyScreen); /*Add a label to the spinner*/
+  lv_label_set_text(label_warm, "Ready");  /*Set the labels text*/
+  lv_obj_align(label_warm, LV_ALIGN_CENTER, -90, -75);
+  
+  spinner_huff = lv_spinner_create(lv_scr_act(), 1000, 50);
+  lv_obj_add_event_cb(spinner_huff, db_btn_event_cb, LV_EVENT_ALL, NULL);
+  lv_obj_set_size(spinner_huff, 70, 70);
+  lv_obj_align(spinner_huff, LV_ALIGN_CENTER, 0, 5);
+  lv_obj_add_flag(spinner_huff, LV_OBJ_FLAG_HIDDEN);
+  // huff label
+  lv_obj_t *label_huff = lv_label_create(bodyScreen); /*Add a label to the spinner*/
+  lv_label_set_text(label_huff, "Huff");  /*Set the labels text*/
+  lv_obj_align(label_huff, LV_ALIGN_CENTER, 0, -75);
+
+  spinner_save = lv_spinner_create(lv_scr_act(), 1000, 50);
+  lv_obj_add_event_cb(spinner_save, db_btn_event_cb, LV_EVENT_ALL, NULL);
+  lv_obj_set_size(spinner_save, 70, 70);
+  lv_obj_align(spinner_save, LV_ALIGN_CENTER, 90, 5);
+  lv_obj_add_flag(spinner_save, LV_OBJ_FLAG_HIDDEN);
+  // save label
+  lv_obj_t *label_save = lv_label_create(bodyScreen); /*Add a label to the button*/
+  lv_label_set_text(label_save, "Save");  /*Set the labels text*/
+  lv_obj_align(label_save, LV_ALIGN_CENTER, 90, -75);
+
+  // action button
   db_settingBtn = lv_btn_create(bodyScreen);
   lv_obj_set_size(db_settingBtn, 60, 30);
-  lv_obj_align(db_settingBtn, LV_ALIGN_CENTER, 0, 50);
+  lv_obj_align(db_settingBtn, LV_ALIGN_CENTER, 0, 60);
   
   lv_obj_add_event_cb(db_settingBtn, db_btn_event_cb, LV_EVENT_ALL, NULL);
   lv_obj_t *label = lv_label_create(db_settingBtn); /*Add a label to the button*/
@@ -293,7 +320,6 @@ void db_btn_event_cb(lv_event_t *e) {
   lv_obj_t *btn = lv_event_get_target(e);
 
   if (code == LV_EVENT_CLICKED && btn == db_settingBtn) {
-    Serial.println("Data Event Btn Clicked");
     
     firestoreUpload(); // Assume this is now non-blocking or called asynchronously
     
@@ -305,10 +331,20 @@ void check_upload_status(lv_timer_t * timer) {
     // You don't necessarily need to use the timer parameter if not needed
     (void)timer; // This line is just to avoid unused variable warnings
 
-    if (uploadInProgress) {
-        lv_obj_clear_flag(spinner, LV_OBJ_FLAG_HIDDEN); // Show spinner
+    if (warmingInProgress) {
+        lv_obj_clear_flag(spinner_warm, LV_OBJ_FLAG_HIDDEN); // Show spinner_huff
     } else {
-        lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN); // Hide spinner after the operation
+        lv_obj_add_flag(spinner_warm, LV_OBJ_FLAG_HIDDEN); // Hide spinner_huff after the operation
+    }
+    if (samplingInProgress) {
+        lv_obj_clear_flag(spinner_huff, LV_OBJ_FLAG_HIDDEN); // Show spinner_huff
+    } else {
+        lv_obj_add_flag(spinner_huff, LV_OBJ_FLAG_HIDDEN); // Hide spinner_huff after the operation
+    }
+    if (uploadInProgress) {
+        lv_obj_clear_flag(spinner_save, LV_OBJ_FLAG_HIDDEN); // Show spinner_huff
+    } else {
+        lv_obj_add_flag(spinner_save, LV_OBJ_FLAG_HIDDEN); // Hide spinner_huff after the operation
     }
 }
   

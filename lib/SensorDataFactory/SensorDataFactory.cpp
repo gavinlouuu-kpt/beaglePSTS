@@ -11,6 +11,10 @@
 #include <chrono>
 #include <algorithm> // For std::copy
 
+extern volatile bool warmingInProgress = false;
+
+extern volatile bool samplingInProgress = false;
+
 bool SensorDataFactory::bme_begin() {
     if (!bme.begin()) {
         Serial.println("Could not find a valid BME680 sensor, check wiring!");
@@ -62,6 +66,7 @@ int SensorDataFactory::breath_check(){
 }
 
 void SensorDataFactory::preSampling(){
+    warmingInProgress = true;
     ledcWrite(PumpPWM, 155); // turn on pump
     if (!bme_begin()) {
         Serial.println("Failed to initialize BME680 sensor.");
@@ -75,7 +80,7 @@ void SensorDataFactory::preSampling(){
         Serial.print(".");
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-
+    warmingInProgress = false;
 }
 
 void SensorDataFactory::postSampling(){
@@ -93,6 +98,7 @@ int SensorDataFactory::dummyData(){
 void SensorDataFactory::performSampling(std::vector<float>& conVec, std::vector<uint32_t>& dataVec) {
     using namespace std::chrono;
     preSampling();
+    samplingInProgress = true;
     // if (!bme_begin()) {
     //     Serial.println("Failed to initialize BME680 sensor.");
     //     return;
@@ -128,6 +134,7 @@ void SensorDataFactory::performSampling(std::vector<float>& conVec, std::vector<
         conVec.push_back(duration.count() * 1000); // Convert duration to milliseconds
     }
     postSampling();
+    samplingInProgress = false;
 
 }
 
