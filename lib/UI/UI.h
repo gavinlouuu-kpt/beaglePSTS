@@ -35,4 +35,8 @@ void check_upload_status(lv_timer_t *timer);
 void updateLocalTime();
 
 
+void test_btn_event_cb(lv_event_t *e);
+void test_check_breath(void *pvParameters);
+void testBreath();
+
 #endif // UI_h

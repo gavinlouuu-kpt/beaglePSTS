@@ -23,22 +23,30 @@ bool SensorDataFactory::bme_begin() {
     bme.setTemperatureOversampling(BME680_OS_8X);
     bme.setHumidityOversampling(BME680_OS_2X);
     bme.setPressureOversampling(BME680_OS_4X);
-    bme.setIIRFilterSize(BME680_FILTER_SIZE_0);
+    bme.setIIRFilterSize(BME680_FILTER_SIZE_1);
     bme.setGasHeater(400, 10); // 320*C for 150 ms
     return true;
 }
 
 
+
+
 int SensorDataFactory::breath_check(){
+    preSampling();
     auto start_time = std::chrono::steady_clock::now(); // Record start time for timeout check
     auto previoustime = std::chrono::steady_clock::now();
     std::vector<int> Sensor_arr; // Vector to store sensor readings dynamically.
 
     while (true) {
-        int sensorValue = dummyData(); // Placeholder for actual sensor reading logic.
-
+        int sensorValue = 0;
+        if (bme.performReading()){
+            sensorValue = bme.gas_resistance;
+            Serial.print(">Breath:");
+            Serial.println(sensorValue);
+        }
+        
         // Add new sensor value, ensure vector does not exceed 100 elements.
-        if (Sensor_arr.size() < 100) {
+        if (Sensor_arr.size() < 10) {
             Sensor_arr.push_back(sensorValue);
         } else {
             // Shift vector contents, discarding the oldest reading.
@@ -49,8 +57,8 @@ int SensorDataFactory::breath_check(){
         // Every 500 milliseconds, check if the change in sensor values indicates a breath.
         auto now = std::chrono::steady_clock::now();
         if (std::chrono::duration_cast<std::chrono::milliseconds>(now - previoustime).count() > 500) {
-            if (Sensor_arr.size() >= 100 && Sensor_arr.back() - Sensor_arr.front() > 200) {
-                Serial.print("Baseline: ");
+            if (Sensor_arr.size() >= 5 && Sensor_arr.front() - Sensor_arr.back() > 500) {
+                Serial.print(">Baseline:");
                 Serial.println(Sensor_arr.front());
                 return Sensor_arr.front(); // Return the baseline value indicating a breath detected.
             }

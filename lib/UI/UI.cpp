@@ -32,6 +32,7 @@ lv_style_t popupBox_style;
 lv_obj_t *timeLabel;
 lv_obj_t *settings;
 lv_obj_t *settingBtn;
+lv_obj_t *testingBtn;
 lv_obj_t *db_settingBtn;
 lv_obj_t *spinner_warm;
 lv_obj_t *spinner_huff;
@@ -130,9 +131,17 @@ lv_style_t style_btn;
   lv_obj_set_size(settingBtn, 30, 30);
   lv_obj_align(settingBtn, LV_ALIGN_RIGHT_MID, 0, 0);
 
+  testingBtn = lv_btn_create(statusBar);
+  lv_obj_set_size(testingBtn, 30, 30);
+  lv_obj_align(testingBtn, LV_ALIGN_RIGHT_MID, -50, 0);
+
   // db_settingBtn = lv_btn_create(statusBar);
   // lv_obj_set_size(db_settingBtn, 30, 30);
   // lv_obj_align(db_settingBtn, LV_ALIGN_RIGHT_MID, 0, 0);
+  lv_obj_add_event_cb(testingBtn, test_btn_event_cb, LV_EVENT_ALL, NULL);
+  lv_obj_t *label_test = lv_label_create(testingBtn); /*Add a label to the button*/
+  lv_label_set_text(label_test, LV_SYMBOL_WARNING);  /*Set the labels text*/
+  lv_obj_center(label_test);
 
   lv_obj_add_event_cb(settingBtn, btn_event_cb, LV_EVENT_ALL, NULL);
   lv_obj_t *label = lv_label_create(settingBtn); /*Add a label to the button*/
@@ -140,6 +149,33 @@ lv_style_t style_btn;
   lv_obj_center(label);
 }
 
+//-----test
+void testBreath() {
+  xTaskCreate(test_check_breath,
+              "checkTask",
+              2048,
+              NULL,
+              1,
+              NULL);
+}
+
+void test_check_breath(void *pvParameters) {
+  SensorDataFactory sensorDataFactory;
+  ledcWrite(PumpPWM, 155); // turn on pump
+  int breath = sensorDataFactory.breath_check();
+  ledcWrite(PumpPWM, 0); // turn off pump
+  vTaskDelete(NULL);
+}
+
+void test_btn_event_cb(lv_event_t *e){
+  lv_event_code_t code = lv_event_get_code(e);
+  lv_obj_t *btn = lv_event_get_target(e);
+  if (code == LV_EVENT_CLICKED && btn == testingBtn) {
+    testBreath();
+    // testFactory.dataStream();
+  }
+}
+//----- test
 void btn_event_cb(lv_event_t *e) {
   lv_event_code_t code = lv_event_get_code(e);
   lv_obj_t *btn = lv_event_get_target(e);
