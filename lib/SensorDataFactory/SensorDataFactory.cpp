@@ -32,6 +32,8 @@ bool SensorDataFactory::bme_begin() {
 
 
 int SensorDataFactory::breath_check(){
+    /*return a vector that is compatible with dataVec
+    pass on the vector for further data collection*/
     preSampling();
     auto start_time = std::chrono::steady_clock::now(); // Record start time for timeout check
     auto previoustime = std::chrono::steady_clock::now();
@@ -60,6 +62,12 @@ int SensorDataFactory::breath_check(){
             if (Sensor_arr.size() >= 5 && Sensor_arr.front() - Sensor_arr.back() > 500) {
                 Serial.print(">Baseline:");
                 Serial.println(Sensor_arr.front());
+                // print out full array of Sensor_arr via serial monitor
+                Serial.println("Sensor_arr: ");
+                for (int i = 0; i < Sensor_arr.size(); i++) {
+                    Serial.print(Sensor_arr[i]);
+                    Serial.print(", ");
+                }
                 return Sensor_arr.front(); // Return the baseline value indicating a breath detected.
             }
             previoustime = now; // Reset the timer for the next interval check.
