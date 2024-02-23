@@ -31,16 +31,20 @@ lv_style_t border_style;
 lv_style_t popupBox_style;
 lv_obj_t *timeLabel;
 lv_obj_t *settings;
+lv_obj_t *tuning;
 lv_obj_t *settingBtn;
 lv_obj_t *testingBtn;
+lv_obj_t *tuningBtn;
 lv_obj_t *db_settingBtn;
 lv_obj_t *spinner_warm;
 lv_obj_t *spinner_huff;
 lv_obj_t *spinner_save;
 lv_obj_t *settingCloseBtn;
+lv_obj_t *tuningCloseBtn;
 lv_obj_t *settingWiFiSwitch;
 lv_obj_t *wfList;
 lv_obj_t *settinglabel;
+lv_obj_t *tuninglabel;
 lv_obj_t *mboxConnect;
 lv_obj_t *mboxTitle;
 lv_obj_t *mboxPassword;
@@ -124,8 +128,8 @@ lv_style_t style_btn;
   timeLabel = lv_label_create(statusBar);
   lv_obj_set_size(timeLabel, tft.width() - 50, 30);
 
-  lv_label_set_text(timeLabel, "WiFi Not Connected!    " LV_SYMBOL_CLOSE);
-  lv_obj_align(timeLabel, LV_ALIGN_LEFT_MID, 8, 4);
+  lv_label_set_text(timeLabel, "WiFi Not Connected!  ");
+  lv_obj_align(timeLabel, LV_ALIGN_LEFT_MID, 2, 7);
 
   settingBtn = lv_btn_create(statusBar);
   lv_obj_set_size(settingBtn, 30, 30);
@@ -133,11 +137,20 @@ lv_style_t style_btn;
 
   testingBtn = lv_btn_create(statusBar);
   lv_obj_set_size(testingBtn, 30, 30);
-  lv_obj_align(testingBtn, LV_ALIGN_RIGHT_MID, -50, 0);
+  lv_obj_align(testingBtn, LV_ALIGN_RIGHT_MID, -35, 0);
+
+  tuningBtn = lv_btn_create(statusBar);
+  lv_obj_set_size(tuningBtn, 30, 30);
+  lv_obj_align(tuningBtn, LV_ALIGN_RIGHT_MID, -70, 0);
 
   // db_settingBtn = lv_btn_create(statusBar);
   // lv_obj_set_size(db_settingBtn, 30, 30);
   // lv_obj_align(db_settingBtn, LV_ALIGN_RIGHT_MID, 0, 0);
+  lv_obj_add_event_cb(tuningBtn, tuning_btn_event_cb, LV_EVENT_ALL, NULL);
+  lv_obj_t *label_tuning = lv_label_create(tuningBtn); /*Add a label to the button*/
+  lv_label_set_text(label_tuning, LV_SYMBOL_OK);  /*Set the labels text*/
+  lv_obj_center(label_tuning);
+  
   lv_obj_add_event_cb(testingBtn, test_btn_event_cb, LV_EVENT_ALL, NULL);
   lv_obj_t *label_test = lv_label_create(testingBtn); /*Add a label to the button*/
   lv_label_set_text(label_test, LV_SYMBOL_WARNING);  /*Set the labels text*/
@@ -149,6 +162,17 @@ lv_style_t style_btn;
   lv_obj_center(label);
 }
 
+void tuning_btn_event_cb(lv_event_t *e) {
+  lv_event_code_t code = lv_event_get_code(e);
+  lv_obj_t *btn = lv_event_get_target(e);
+  if (code == LV_EVENT_CLICKED) {
+    if (btn == tuningBtn){
+      lv_obj_clear_flag(tuning, LV_OBJ_FLAG_HIDDEN);
+    } else if (btn == tuningCloseBtn) {
+      lv_obj_add_flag(tuning, LV_OBJ_FLAG_HIDDEN);
+    }
+  }
+}
 //-----test
 void testBreath() {
   xTaskCreate(test_check_breath,
@@ -412,6 +436,35 @@ void buildSettings() {
   wfList = lv_list_create(settings);
   lv_obj_set_size(wfList, tft.width() - 140, 210);
   lv_obj_align_to(wfList, settinglabel, LV_ALIGN_TOP_LEFT, 0, 30);
+}
+
+void buildTuning() {
+  tuning = lv_obj_create(lv_scr_act());
+  lv_obj_add_style(tuning, &border_style, 0);
+  lv_obj_set_size(tuning, tft.width() - 100, tft.height() - 40);
+  lv_obj_align(tuning, LV_ALIGN_CENTER, 0, 0);
+  lv_obj_add_flag(tuning, LV_OBJ_FLAG_HIDDEN);
+
+  tuninglabel = lv_label_create(tuning);
+  lv_label_set_text(tuninglabel, "Tuning " LV_SYMBOL_OK);
+  lv_obj_align(tuninglabel, LV_ALIGN_TOP_LEFT, 0, 0);
+
+  tuningCloseBtn = lv_btn_create(tuning);
+  lv_obj_set_size(tuningCloseBtn, 30, 30);
+  lv_obj_align(tuningCloseBtn, LV_ALIGN_TOP_RIGHT, 0, -10);
+  lv_obj_add_event_cb(tuningCloseBtn, tuning_btn_event_cb, LV_EVENT_ALL, NULL);
+  lv_obj_t *btnSymbol = lv_label_create(tuningCloseBtn);
+  lv_label_set_text(btnSymbol, LV_SYMBOL_CLOSE);
+  lv_obj_center(btnSymbol);
+
+  // settingWiFiSwitch = lv_switch_create(tuning);
+  // lv_obj_add_event_cb(settingWiFiSwitch, btn_event_cb, LV_EVENT_ALL, NULL);
+  // lv_obj_align_to(settingWiFiSwitch, tuninglabel, LV_ALIGN_TOP_RIGHT, 60, -10);
+  // lv_obj_add_flag(tuning, LV_OBJ_FLAG_HIDDEN);
+
+  // wfList = lv_list_create(tuning);
+  // lv_obj_set_size(wfList, tft.width() - 140, 210);
+  // lv_obj_align_to(wfList, tuninglabel, LV_ALIGN_TOP_LEFT, 0, 30);
 }
 
 void list_event_handler(lv_event_t *e) {

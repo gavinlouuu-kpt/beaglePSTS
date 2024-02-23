@@ -39,4 +39,7 @@ void test_btn_event_cb(lv_event_t *e);
 void test_check_breath(void *pvParameters);
 void testBreath();
 
+void tuning_btn_event_cb(lv_event_t *e);
+void buildTuning();
+
 #endif // UI_h

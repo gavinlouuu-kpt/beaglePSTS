@@ -249,6 +249,7 @@ void setup()
     buildSettings();
     tryPreviousNetwork();
     networkCheck();
+    buildTuning();
     lv_timer_t * timer = lv_timer_create(check_upload_status, 1000, NULL); // 1000 ms interval
  
     // Serial.println( "Setup done" );
