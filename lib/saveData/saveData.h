@@ -21,7 +21,6 @@ void dataFF(void *pvParameters);
 void firestoreUpload();
 void fbKeepAlive();
 
-void AppendArrayTest();
 void AppendMapTest();
 // void dataFactoryTest();
 // void fsCall();

@@ -202,7 +202,6 @@ void cmdSetup() {
     // commandMap["fireGetSample"] = []() { fireGetSample(); };
     // commandMap["dataFF"] = []() { dataFF(); };
     commandMap["info"] = []() { ESPinfo(); };
-    commandMap["append"] = []() { AppendArrayTest(); };
     commandMap["appendmap"] = []() { AppendMapTest(); };
     // commandMap["readP"] = []() { readPumpSpeed("/factory/preset.json"); };
     // commandMap["localRead"] = []() { localRead(); };
