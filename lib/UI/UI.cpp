@@ -27,6 +27,8 @@ typedef enum {
 } Network_Status_t;
 Network_Status_t networkStatus = NONE;
 
+lv_obj_t *spinbox;
+
 lv_style_t border_style;
 lv_style_t popupBox_style;
 lv_obj_t *timeLabel;
@@ -465,6 +467,48 @@ void buildTuning() {
   // wfList = lv_list_create(tuning);
   // lv_obj_set_size(wfList, tft.width() - 140, 210);
   // lv_obj_align_to(wfList, tuninglabel, LV_ALIGN_TOP_LEFT, 0, 30);
+  lv_example_spinbox_1();
+}
+
+static void lv_spinbox_increment_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_SHORT_CLICKED || code  == LV_EVENT_LONG_PRESSED_REPEAT) {
+        lv_spinbox_increment(spinbox);
+    }
+}
+
+static void lv_spinbox_decrement_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_SHORT_CLICKED || code == LV_EVENT_LONG_PRESSED_REPEAT) {
+        lv_spinbox_decrement(spinbox);
+    }
+}
+
+
+void lv_example_spinbox_1(void)
+{
+    spinbox = lv_spinbox_create(tuning);
+    lv_spinbox_set_range(spinbox, 0, 255);
+    lv_spinbox_set_digit_format(spinbox, 3,3);
+    lv_spinbox_step_prev(spinbox);
+    lv_obj_set_width(spinbox, 100);
+    lv_obj_center(spinbox);
+
+    lv_coord_t h = lv_obj_get_height(spinbox);
+
+    lv_obj_t * btn = lv_btn_create(tuning);
+    lv_obj_set_size(btn, h, h);
+    lv_obj_align_to(btn, spinbox, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
+    lv_obj_set_style_bg_img_src(btn, LV_SYMBOL_PLUS, 0);
+    lv_obj_add_event_cb(btn, lv_spinbox_increment_event_cb, LV_EVENT_ALL,  NULL);
+
+    btn = lv_btn_create(tuning);
+    lv_obj_set_size(btn, h, h);
+    lv_obj_align_to(btn, spinbox, LV_ALIGN_OUT_LEFT_MID, -5, 0);
+    lv_obj_set_style_bg_img_src(btn, LV_SYMBOL_MINUS, 0);
+    lv_obj_add_event_cb(btn, lv_spinbox_decrement_event_cb, LV_EVENT_ALL, NULL);
 }
 
 void list_event_handler(lv_event_t *e) {

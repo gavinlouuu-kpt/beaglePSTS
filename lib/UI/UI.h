@@ -42,4 +42,8 @@ void testBreath();
 void tuning_btn_event_cb(lv_event_t *e);
 void buildTuning();
 
+static void lv_spinbox_increment_event_cb(lv_event_t * e);
+static void lv_spinbox_decrement_event_cb(lv_event_t * e);
+void lv_example_spinbox_1(void);
+
 #endif // UI_h
