@@ -14,7 +14,7 @@
 #include <map>
 #include <vector>
 #include <Hardware.h>
-// #include <beagleCLI.h>
+#include <beagleCLI.h>
 // #include <Network.h>
 #include <UI.h>
 
@@ -204,6 +204,7 @@ void setup()
     Wire.begin(C_SDA, C_SCL);
     pinSetup();
     pwmSetup();
+    cmdSetup();
 
 #if LV_USE_LOG != 0
     lv_log_register_print_cb( my_print ); /* register print function for debugging */
@@ -241,6 +242,8 @@ void setup()
     // lv_label_set_text( label, "Hello Ardino and LVGL!");
     // lv_obj_align( label, LV_ALIGN_CENTER, 0, 0 );
     
+    CLI_Call();
+
     setStyle();
     makeKeyboard();
     buildStatusBar();

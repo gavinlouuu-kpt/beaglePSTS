@@ -10,5 +10,7 @@ void printFileContent();
 void listFilesInDirectory();
 bool deleteAllFilesInLittleFS();
 bool deleteAllFilesInDirectory(const char *dirPath);
+void CLI_Call();
+void CLI_Task(void *pvParameters);
 
 #endif // SAVEDATA_H

@@ -136,15 +136,15 @@ bool deleteAllFilesInDirectory(const char *dirPath) {
 }
 
 void cmdSetup() {
-    commandMap["init"] = [&]() { fsInit(); };
+    // commandMap["init"] = [&]() { fsInit(); };
     commandMap["deleteAll"] = []() { deleteAllFilesInLittleFS();};
     commandMap["ls"] = []() { listFilesInDirectory(); };
     commandMap["open"] = []() { printFileContent(); };
-    commandMap["arraytest"] = []() { addArrayJSON(userID,globalLists); };
+    // commandMap["arraytest"] = []() { addArrayJSON(userID,globalLists); };
     // commandMap["fireGetSample"] = []() { fireGetSample(); };
-    commandMap["dataFF"] = []() { dataFF(); };
+    // commandMap["dataFF"] = []() { dataFF(); };
     commandMap["info"] = []() { ESPinfo(); };
-    commandMap["localRead"] = []() { localRead(); };
+    // commandMap["localRead"] = []() { localRead(); };
     // commandMap["dataFactory"] = []() { dataFactoryTest(); };
     commandMap["help"] = [&]() {
     Serial.println("Available commands:");
@@ -161,4 +161,20 @@ void beagleCLI() {
         Serial.println("Received command: " + receivedCommand);
         processCommand(receivedCommand);            
     }
+}
+
+void CLI_Task(void *pvParameters) {
+    while (true) {
+        beagleCLI();
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+
+void CLI_Call(){
+    xTaskCreate(CLI_Task,
+              "CLI_Task",
+              2048,
+              NULL,
+              1,
+              NULL);
 }
