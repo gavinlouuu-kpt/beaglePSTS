@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <Init.h>
 
 #include <SensorData.h>
 #include <SensorDataFactory.h>

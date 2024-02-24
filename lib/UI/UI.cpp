@@ -7,7 +7,7 @@
 #include "TFT_eSPI.h"
 #include "saveData.h"
 #include "SensorDataFactory.h"
-
+#include <Init.h>
 #include "time.h"
 // const char *ntpServer = "pool.ntp.org";
 // const long gmtOffset_sec = 8 * 60 * 60;  // Set your timezone here

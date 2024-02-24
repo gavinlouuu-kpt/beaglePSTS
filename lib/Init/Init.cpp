@@ -3,6 +3,17 @@
 #include <LittleFS.h>
 #include <FS.h>
 #include <lvgl.h>
+#include <string>
+
+int pumpSpeed;
+String FIREBASE_PROJECT_ID;
+String USER_EMAIL;
+String USER_PASSWORD;
+String DATABASE_URL;
+String API_KEY;
+long gmtOffset_sec;
+int daylightOffset_sec;
+
 
 // // LittleFS system
 void writeFile(const char *path, const char *message) {
@@ -19,11 +30,6 @@ void writeFile(const char *path, const char *message) {
   file.close();
 }
 
-int pumpSpeed;
-
-#include <FirebaseJson.h>
-
-#include <FirebaseJson.h>
 
 // Function to read a generic value from a JSON file and return it as a String
 String readConfigValue(const char *path, const char *jsonPath) {
@@ -62,8 +68,16 @@ String readConfigValue(const char *path, const char *jsonPath) {
 
 
 void configInit(){
-  String pumpSpeedStr = readConfigValue("/config.json","/pump_speed");
-  pumpSpeed = pumpSpeedStr.toInt();
+  pumpSpeed = readConfigValue("/config.json","/pump_speed").toInt();
+  FIREBASE_PROJECT_ID = readConfigValue("/config.json", "/FIREBASE_PROJECT_ID");
+  USER_EMAIL = readConfigValue("/config.json", "/USER_EMAIL");
+  USER_PASSWORD = readConfigValue("/config.json", "/USER_PASSWORD");
+  DATABASE_URL = readConfigValue("/config.json", "/DATABASE_URL");	
+  API_KEY = readConfigValue("/config.json", "/API_KEY");
+  std::string gmtOffset_sec_str = readConfigValue("/config.json", "/gmtOffset_sec").c_str();
+  gmtOffset_sec = std::stol(gmtOffset_sec_str);
+  daylightOffset_sec = readConfigValue("/config.json", "/daylightOffset_sec").toInt();
+  
   
   //other use cases
   // String isEnabledStr = readConfigValue("/config.json", "/is_enabled");
