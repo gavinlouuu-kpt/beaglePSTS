@@ -50,9 +50,27 @@ String readSerialInput() {
     return input;
 }
 
+// void printFileContent() {
+//     Serial.println("Enter the file name to open:");
+//     String fileName = readSerialInput();
+//     Serial.println("Opening file: " + fileName);
+
+//     File file = LittleFS.open("/" + fileName, "r");
+//     if (!file) {
+//         Serial.println("Failed to open file for reading");
+//         return;
+//     }
+
+//     Serial.println("Contents of the file:");
+//     while (file.available()) {
+//         Serial.write(file.read());
+//     }
+//     file.close();
+// }
+
 void printFileContent() {
     Serial.println("Enter the file name to open:");
-    String fileName = readSerialInput();
+    String fileName = readSerialInput(); // Make sure this function implements a way to read input from Serial.
     Serial.println("Opening file: " + fileName);
 
     File file = LittleFS.open("/" + fileName, "r");
@@ -61,39 +79,69 @@ void printFileContent() {
         return;
     }
 
-    Serial.println("Contents of the file:");
+    Serial.println("Contents of the file (hex):");
     while (file.available()) {
-        Serial.write(file.read());
+        char c = file.read();
+        // Print each byte as a 2-digit hexadecimal number.
+        Serial.print("0x");
+        if ((uint8_t)c < 0x10) Serial.print("0"); // Add leading zero for numbers less than 0x10
+        Serial.print((uint8_t)c, HEX);
+        Serial.print(" ");
     }
+    Serial.println(); // New line after printing file content
     file.close();
 }
 
-
-void listFilesInDirectory() {
-    File root = LittleFS.open("/");
-
-    if (!root) {
+void listFilesInDirectory(const String& directoryPath) {
+    File dir = LittleFS.open(directoryPath);
+    if (!dir || !dir.isDirectory()) {
         Serial.println("Failed to open directory");
         return;
     }
-    if (!root.isDirectory()) {
-        Serial.println("Not a directory");
-        return;
-    }
 
-    Serial.println("List of files:");
-    File file = root.openNextFile();
+    File file = dir.openNextFile();
     while (file) {
         if (file.isDirectory()) {
             Serial.print("DIR : ");
             Serial.println(file.name());
+            // Recursively list nested directories
+            listFilesInDirectory(file.name());
         } else {
             Serial.print("FILE: ");
             Serial.println(file.name());
         }
-        file = root.openNextFile();
+        file = dir.openNextFile();
     }
 }
+
+
+
+// void listFilesInDirectory() {
+//     File root = LittleFS.open("/");
+
+//     if (!root) {
+//         Serial.println("Failed to open directory");
+//         return;
+//     }
+//     if (!root.isDirectory()) {
+//         Serial.println("Not a directory");
+//         return;
+//     }
+
+//     Serial.println("List of files:");
+//     File file = root.openNextFile();
+//     while (file) {
+//         if (file.isDirectory()) {
+//             Serial.print("DIR : ");
+//             Serial.println(file.name());
+//         } else {
+//             Serial.print("FILE: ");
+//             Serial.println(file.name());
+//         }
+//         file = root.openNextFile();
+//         delay(1);
+//     }
+// }
 
 
 bool deleteAllFilesInLittleFS() {
@@ -173,7 +221,7 @@ void CLI_Task(void *pvParameters) {
 void CLI_Call(){
     xTaskCreate(CLI_Task,
               "CLI_Task",
-              2048,
+              4096,
               NULL,
               1,
               NULL);

@@ -201,6 +201,7 @@ void touch_calibrate()
 void setup()
 {
     Serial.begin( 115200 ); /* prepare for possible serial debug */
+    LittleFS.begin();
     Wire.begin(C_SDA, C_SCL);
     pinSetup();
     pwmSetup();
