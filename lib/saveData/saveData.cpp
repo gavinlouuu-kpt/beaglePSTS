@@ -400,17 +400,81 @@ void firestoreUpload() {
 
 volatile bool uploadInProgress = false;
 
+// void dataFF(void *pvParameters){
+//     Serial.println("Enter dataFF");
+    
+//     SensorDataFactory factory;
+//     SensorData sensorData = factory.createSensorData();
+    
+//     if (Firebase.ready() && (millis() - dataMillis > 30000 || dataMillis == 0))
+//     {
+//         uploadInProgress = true;
+//         dataMillis = millis();
+//             // For the usage of FirebaseJson, see examples/FirebaseJson/BasicUsage/Create_Edit_Parse/Create_Edit_Parse.ino
+//             FirebaseJson content;
+//             std::string macAddressTest = WiFi.macAddress().c_str();
+//             // obtain date
+//             struct tm timeinfo;
+//             if (!getLocalTime(&timeinfo)) {
+//                 Serial.println("Failed to obtain time");
+//                 return;
+//             }
+
+//             char today[11]; // Buffer to hold the date string
+//             strftime(today, sizeof(today), "%Y-%m-%d", &timeinfo); // Format: YYYY-MM-DD
+
+//             char currentTime[9]; // Buffer to hold the time string
+//             strftime(currentTime, sizeof(currentTime), "%H_%M_%S", &timeinfo); // Format: HH:MM:SS
+
+//             std::string jsonKey = std::string("fields/t") + currentTime;
+//             std::string info = jsonKey + "/mapValue/fields/info/stringValue";
+//             std::string condition = jsonKey + "/mapValue/fields/condition/stringValue";
+//             std::string data = jsonKey + "/mapValue/fields/data/stringValue";
+            
+//             std::string infoString = sensorData.getInfoString();
+//             std::string conString = vectorToString(sensorData.getConVec()); 
+//             std::string dataString = vectorToString(sensorData.getDataVec()); 
+            
+//             content.set(info, infoString.c_str());
+//             content.set(condition, conString.c_str());
+//             content.set(data, dataString.c_str());
+//             // info is the collection id, countries is the document id in collection info.
+//             std::string documentPath = macAddressTest + "/" + today;
+
+//             // Here's the critical part: specify the new field in the updateMask
+//             std::string updateMask = std::string("t") + currentTime; // This is "fields/<currentTime>"
+            
+//             if (Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, documentPath.c_str(), content.raw(), updateMask /* updateMask */))
+//                 Serial.println("ok");
+                
+//             else
+//                 Serial.println(fbdo.errorReason());
+//         }
+//     uploadInProgress = false;
+//     UBaseType_t uxHighWaterMark;
+//     uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+//     Serial.print("Minimum free stack for dataFF task: ");
+//     Serial.println(uxHighWaterMark);
+//     vTaskDelete(fsUploadTaskHandler);
+// }
+
 void dataFF(void *pvParameters){
     Serial.println("Enter dataFF");
     
     SensorDataFactory factory;
     SensorData sensorData = factory.createSensorData();
     
-    if (Firebase.ready() && (millis() - dataMillis > 30000 || dataMillis == 0))
-    {
-        uploadInProgress = true;
-        dataMillis = millis();
+            uploadInProgress = true;
+        // dataMillis = millis();
+
             // For the usage of FirebaseJson, see examples/FirebaseJson/BasicUsage/Create_Edit_Parse/Create_Edit_Parse.ino
+            // The dyamic array of write object firebase_firestore_document_write_t.
+            std::vector<struct firebase_firestore_document_write_t> writes;
+            // A write object that will be written to the document.
+            struct firebase_firestore_document_write_t update_write;
+            update_write.type = firebase_firestore_document_write_type_update;
+            // Set the document content to write (transform)
+            
             FirebaseJson content;
             std::string macAddressTest = WiFi.macAddress().c_str();
             // obtain date
@@ -438,18 +502,31 @@ void dataFF(void *pvParameters){
             content.set(info, infoString.c_str());
             content.set(condition, conString.c_str());
             content.set(data, dataString.c_str());
+
+            update_write.update_document_content = content.raw();
+
+
             // info is the collection id, countries is the document id in collection info.
             std::string documentPath = macAddressTest + "/" + today;
 
             // Here's the critical part: specify the new field in the updateMask
             std::string updateMask = std::string("t") + currentTime; // This is "fields/<currentTime>"
-            
-            if (Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, documentPath.c_str(), content.raw(), updateMask /* updateMask */))
-                Serial.println("ok");
-                
+            update_write.update_masks = updateMask;
+            update_write.update_document_path = documentPath.c_str();
+
+            writes.push_back(update_write);
+
+            if (Firebase.Firestore.commitDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, writes /* dynamic array of firebase_firestore_document_write_t */, "" /* transaction */))
+                Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
             else
                 Serial.println(fbdo.errorReason());
-        }
+
+            // if (Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, documentPath.c_str(), content.raw(), updateMask /* updateMask */))
+            //     Serial.println("ok");
+                
+            // else
+            //     Serial.println(fbdo.errorReason());
+
     uploadInProgress = false;
     UBaseType_t uxHighWaterMark;
     uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
@@ -459,35 +536,21 @@ void dataFF(void *pvParameters){
 }
 
 
+
+
 void AppendMapTest()
 {
-
-    // Firebase.ready() should be called repeatedly to handle authentication tasks.
-
-        
         count++;
-
         Serial.print("Commit a document (append map value in document)... ");
-
         // The dyamic array of write object firebase_firestore_document_write_t.
         std::vector<struct firebase_firestore_document_write_t> writes;
-
         // A write object that will be written to the document.
         struct firebase_firestore_document_write_t update_write;
-
-        // Set the write object write operation type.
-        // firebase_firestore_document_write_type_update,
-        // firebase_firestore_document_write_type_delete,
-        // firebase_firestore_document_write_type_transform
         update_write.type = firebase_firestore_document_write_type_update;
-
         // Set the document content to write (transform)
-
         FirebaseJson content;
         String documentPath = "test_collection/test_document";
-
         content.set("fields/myMap"+ String(count) +"/mapValue/fields/key" + String(count) + "/stringValue", "value" + String(count));
-
         // Set the update document content
         update_write.update_document_content = content.raw();
 
