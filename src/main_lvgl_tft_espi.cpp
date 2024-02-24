@@ -8,7 +8,7 @@
 #include <SD.h>
 #include <WiFi.h>
 #include <Update.h>
-#include <credential.h>
+// #include <credential.h>
 #include <time.h>
 #include <saveData.h>
 #include <map>

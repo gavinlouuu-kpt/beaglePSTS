@@ -9,9 +9,7 @@
 #include "SensorDataFactory.h"
 #include <Init.h>
 #include "time.h"
-// const char *ntpServer = "pool.ntp.org";
-// const long gmtOffset_sec = 8 * 60 * 60;  // Set your timezone here
-// const int daylightOffset_sec = 0;
+
 
 #include <EEPROM.h>
 #define EEPROM_SIZE 128
@@ -292,7 +290,7 @@ void timerForNetwork(lv_timer_t *timer) {
     case NETWORK_CONNECTED_POPUP:
       popupMsgBox("WiFi Connected!", "Now you'll get the current time soon.");
       networkStatus = NETWORK_CONNECTED;
-      configTime(gmtOffset_sec, daylightOffset_sec, ntpServer,"asia.pool.ntp.org","time.nist.gov");
+      configTime(gmtOffset_sec, daylightOffset_sec, "hk.pool.ntp.org","asia.pool.ntp.org","time.nist.gov");
       break;
 
     case NETWORK_CONNECTED:

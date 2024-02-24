@@ -4,7 +4,7 @@
 #include <LittleFS.h>
 #include <map>
 #include <Arduino.h>
-#include <credential.h>
+// #include <credential.h>
 #include <stdio.h>
 #include <string>
 #include <vector>
@@ -53,38 +53,38 @@
 //     }
 // }
 
-void fsInit() {
-    const char* macAddress = WiFi.macAddress().c_str(); // Example MAC address
-    char filePath[64];
-    snprintf(filePath, sizeof(filePath), "/%s.json", macAddress);
-    Serial.println("filePath:");
-    Serial.println(filePath);
-    if (!LittleFS.exists(filePath)) {
-        Serial.println("Creating new file...");
+// void fsInit() {
+//     const char* macAddress = WiFi.macAddress().c_str(); // Example MAC address
+//     char filePath[64];
+//     snprintf(filePath, sizeof(filePath), "/%s.json", macAddress);
+//     Serial.println("filePath:");
+//     Serial.println(filePath);
+//     if (!LittleFS.exists(filePath)) {
+//         Serial.println("Creating new file...");
 
-        FirebaseJson json;
-        char jsonKey[64];
-        const char* macAddressKey = WiFi.macAddress().c_str();
-        json.set(macAddressKey); //json.set(jsonKey,"") setting an empty string for demonstration
+//         FirebaseJson json;
+//         char jsonKey[64];
+//         const char* macAddressKey = WiFi.macAddress().c_str();
+//         json.set(macAddressKey); //json.set(jsonKey,"") setting an empty string for demonstration
 
-        // Serialize JSON to std::string for writing
-        std::string jsonData;
-        json.toString(jsonData, true); // 'false' for compact serialization
+//         // Serialize JSON to std::string for writing
+//         std::string jsonData;
+//         json.toString(jsonData, true); // 'false' for compact serialization
 
-        // Write to file
-        File file = LittleFS.open(filePath, "w");
-        if (!file) {
-            Serial.println("Failed to open file for writing");
-            return;
-        }
-        file.print(jsonData.c_str());
-        file.close();
+//         // Write to file
+//         File file = LittleFS.open(filePath, "w");
+//         if (!file) {
+//             Serial.println("Failed to open file for writing");
+//             return;
+//         }
+//         file.print(jsonData.c_str());
+//         file.close();
 
-        Serial.println("File created successfully.");
-    } else {
-        Serial.println("File already exists.");
-    }
-}
+//         Serial.println("File created successfully.");
+//     } else {
+//         Serial.println("File already exists.");
+//     }
+// }
 
 
 
@@ -157,73 +157,73 @@ void fsInit() {
 // }
 
 
-void addDataJSON(char userID[], FirebaseJsonArray& nestedData) {
-    String macAddress = WiFi.macAddress();
-    String filePath = "/" + macAddress + ".json";  // Concatenate the MAC address with the file path
+// void addDataJSON(char userID[], FirebaseJsonArray& nestedData) {
+//     String macAddress = WiFi.macAddress();
+//     String filePath = "/" + macAddress + ".json";  // Concatenate the MAC address with the file path
 
-    struct tm timeinfo;
-    if (!getLocalTime(&timeinfo)) {
-        Serial.println("Failed to obtain time");
-        return;
-    }
+//     struct tm timeinfo;
+//     if (!getLocalTime(&timeinfo)) {
+//         Serial.println("Failed to obtain time");
+//         return;
+//     }
 
-    char today[11]; // Buffer to hold the date string
-    strftime(today, sizeof(today), "%Y-%m-%d", &timeinfo); // Format: YYYY-MM-DD
+//     char today[11]; // Buffer to hold the date string
+//     strftime(today, sizeof(today), "%Y-%m-%d", &timeinfo); // Format: YYYY-MM-DD
 
-    char currentTime[9]; // Buffer to hold the time string
-    strftime(currentTime, sizeof(currentTime), "%H:%M:%S", &timeinfo); // Format: HH:MM:SS
+//     char currentTime[9]; // Buffer to hold the time string
+//     strftime(currentTime, sizeof(currentTime), "%H:%M:%S", &timeinfo); // Format: HH:MM:SS
 
-    // Open the JSON file and read its contents
-    File file = LittleFS.open(filePath, "r");
-    if (!file) {
-        Serial.println("Failed to open file for reading");
-        return;
-    }
+//     // Open the JSON file and read its contents
+//     File file = LittleFS.open(filePath, "r");
+//     if (!file) {
+//         Serial.println("Failed to open file for reading");
+//         return;
+//     }
 
-    String fileContent;
-    while (file.available()) {
-        fileContent += char(file.read());
-    }
-    file.close();
+//     String fileContent;
+//     while (file.available()) {
+//         fileContent += char(file.read());
+//     }
+//     file.close();
 
-    // Load data into FirebaseJson object
-    FirebaseJson json;
-    json.setJsonData(fileContent);
+//     // Load data into FirebaseJson object
+//     FirebaseJson json;
+//     json.setJsonData(fileContent);
 
-    // Check if today's date exists
-    FirebaseJsonData jsonData;
-    String path = String(macAddress) + "/" + today;
-    if (!json.get(jsonData, path.c_str())) {
-        // Today's date does not exist, create it
-        FirebaseJson emptyJson;
-        String emptyJsonStr;
-        emptyJson.toString(emptyJsonStr, false); // Serialize empty JSON object to a string
-        json.set(path.c_str(), emptyJsonStr.c_str());
-    }
+//     // Check if today's date exists
+//     FirebaseJsonData jsonData;
+//     String path = String(macAddress) + "/" + today;
+//     if (!json.get(jsonData, path.c_str())) {
+//         // Today's date does not exist, create it
+//         FirebaseJson emptyJson;
+//         String emptyJsonStr;
+//         emptyJson.toString(emptyJsonStr, false); // Serialize empty JSON object to a string
+//         json.set(path.c_str(), emptyJsonStr.c_str());
+//     }
 
-    // Add or update data at the specific time
-    String timePath = String(currentTime);
-    path += "/" + timePath;
+//     // Add or update data at the specific time
+//     String timePath = String(currentTime);
+//     path += "/" + timePath;
 
-    // Serialize the FirebaseJsonArray to a string
-    String nestedDataStr;
-    nestedData.toString(nestedDataStr);
+//     // Serialize the FirebaseJsonArray to a string
+//     String nestedDataStr;
+//     nestedData.toString(nestedDataStr);
     
-    json.set(path.c_str(), nestedDataStr.c_str());
+//     json.set(path.c_str(), nestedDataStr.c_str());
 
-    // Serialize JSON back to String
-    String output;
-    json.toString(output, true); // Set to 'false' for non-pretty format
+//     // Serialize JSON back to String
+//     String output;
+//     json.toString(output, true); // Set to 'false' for non-pretty format
 
-    // Write updated JSON back to file
-    file = LittleFS.open(filePath, "w");
-    if (!file) {
-        Serial.println("Failed to open file for writing");
-        return;
-    }
-    file.print(output);
-    file.close();
-}
+//     // Write updated JSON back to file
+//     file = LittleFS.open(filePath, "w");
+//     if (!file) {
+//         Serial.println("Failed to open file for writing");
+//         return;
+//     }
+//     file.print(output);
+//     file.close();
+// }
 
 
 void populateJsonArray(FirebaseJsonArray& jsonArray, int* list, int length) {
@@ -233,43 +233,43 @@ void populateJsonArray(FirebaseJsonArray& jsonArray, int* list, int length) {
 }
 
 
-void vectorDebug(){
-    for (const auto& list : globalLists) {
-        for (const auto& num : list) {
-        Serial.print(num);
-        Serial.print(" ");
-        }
-    Serial.println();
-    }
-}
+// void vectorDebug(){
+//     for (const auto& list : globalLists) {
+//         for (const auto& num : list) {
+//         Serial.print(num);
+//         Serial.print(" ");
+//         }
+//     Serial.println();
+//     }
+// }
 
-void arrayTestInit(){
-    std::vector<int> list_1 = {1, 2, 3, 4, 5};
-    std::vector<int> list_2 = {5, 4, 3, 2, 1};
-    std::vector<int> list_3 = {5, 4, 3, 2, 1, 1,1};
-    globalLists.clear();
-    globalLists.push_back(list_1);
-    globalLists.push_back(list_2);
-    globalLists.push_back(list_3);
-}
+// void arrayTestInit(){
+//     std::vector<int> list_1 = {1, 2, 3, 4, 5};
+//     std::vector<int> list_2 = {5, 4, 3, 2, 1};
+//     std::vector<int> list_3 = {5, 4, 3, 2, 1, 1,1};
+//     globalLists.clear();
+//     globalLists.push_back(list_1);
+//     globalLists.push_back(list_2);
+//     globalLists.push_back(list_3);
+// }
 
-void addArrayJSON(char userID[], const std::vector<std::vector<int>>& lists) {
-    // Serial.println("Before addArray:"); //debug
-    // vectorDebug(); //debug
-    arrayTestInit();
+// void addArrayJSON(char userID[], const std::vector<std::vector<int>>& lists) {
+//     // Serial.println("Before addArray:"); //debug
+//     // vectorDebug(); //debug
+//     arrayTestInit();
 
-    FirebaseJsonArray nestedData;
-    for (const auto& list : lists) {
-        FirebaseJsonArray innerArray;
-        for (int num : list) {
-            innerArray.add(num);
-        }
-        nestedData.add(innerArray);
-        // Serial.println("addArray Loop:"); //debug
-        // vectorDebug(); //debug
-    }
-    addDataJSON(userID, nestedData);
-}
+//     FirebaseJsonArray nestedData;
+//     for (const auto& list : lists) {
+//         FirebaseJsonArray innerArray;
+//         for (int num : list) {
+//             innerArray.add(num);
+//         }
+//         nestedData.add(innerArray);
+//         // Serial.println("addArray Loop:"); //debug
+//         // vectorDebug(); //debug
+//     }
+//     addDataJSON(userID, nestedData);
+// }
 
 #include <Firebase_ESP_Client.h>
 // Provide the token generation process info.
@@ -320,58 +320,58 @@ void fbKeepAlive(){
     // Serial.println(fbdo.httpConnected() ? "firebase connected" : "firebase not connected");
 }
 
-void localRead(){
-    std::string macAddress = WiFi.macAddress().c_str();
-    std::string filePath = "/" + macAddress + ".json";  // Concatenate the MAC address with the file path
+// void localRead(){
+//     std::string macAddress = WiFi.macAddress().c_str();
+//     std::string filePath = "/" + macAddress + ".json";  // Concatenate the MAC address with the file path
 
-    // Open the file as before
-    File file = LittleFS.open(filePath.c_str(), "r");
-    if (!file) {
-        Serial.println("Failed to open file for reading");
-        return;
-    }
+//     // Open the file as before
+//     File file = LittleFS.open(filePath.c_str(), "r");
+//     if (!file) {
+//         Serial.println("Failed to open file for reading");
+//         return;
+//     }
 
-    // Determine the size of the file
-    size_t fileSize = file.size();
+//     // Determine the size of the file
+//     size_t fileSize = file.size();
 
-    // Reserve space in the string to avoid multiple reallocations
-    std::string fileContent;
-    fileContent.reserve(fileSize);
+//     // Reserve space in the string to avoid multiple reallocations
+//     std::string fileContent;
+//     fileContent.reserve(fileSize);
 
-    // Create a buffer for reading
-    const size_t bufferSize = 512; // Adjust the buffer size depending on available memory
-    char buffer[bufferSize];
+//     // Create a buffer for reading
+//     const size_t bufferSize = 512; // Adjust the buffer size depending on available memory
+//     char buffer[bufferSize];
 
-    // Read the file in blocks
-    while (file.available()) {
-        int bytesRead = file.readBytes(buffer, bufferSize);
-        fileContent.append(buffer, bytesRead);
-    }
+//     // Read the file in blocks
+//     while (file.available()) {
+//         int bytesRead = file.readBytes(buffer, bufferSize);
+//         fileContent.append(buffer, bytesRead);
+//     }
 
-    file.close();
+//     file.close();
 
-    // chunk read
-    FirebaseJson json;
-    json.setJsonData(fileContent);
-    // json.toString(fileContent, true);
-    json.toString(Serial, true);
-    // individual get 
-    Serial.println();
+//     // chunk read
+//     FirebaseJson json;
+//     json.setJsonData(fileContent);
+//     // json.toString(fileContent, true);
+//     json.toString(Serial, true);
+//     // individual get 
+//     Serial.println();
 
-    std::string macAddressKey = WiFi.macAddress().c_str();
-    std::string jsonKey = macAddressKey + "/" + userID;
+//     std::string macAddressKey = WiFi.macAddress().c_str();
+//     std::string jsonKey = macAddressKey + "/" + userID;
 
-    Serial.println("jsonKey:");
-    Serial.println(jsonKey.c_str());
+//     Serial.println("jsonKey:");
+//     Serial.println(jsonKey.c_str());
 
-    FirebaseJsonData result; // object that keeps the deserializing result
-    json.get(result, jsonKey.c_str());
-    Serial.println("get result:");
-    Serial.println(result.to<String>().c_str());
+//     FirebaseJsonData result; // object that keeps the deserializing result
+//     json.get(result, jsonKey.c_str());
+//     Serial.println("get result:");
+//     Serial.println(result.to<String>().c_str());
 
     
 
-}
+// }
 
 template <typename T>
 std::string vectorToString(const std::vector<T>& vec, const std::string& delimiter = ",") {
