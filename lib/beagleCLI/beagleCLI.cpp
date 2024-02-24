@@ -202,9 +202,11 @@ void cmdSetup() {
     // commandMap["fireGetSample"] = []() { fireGetSample(); };
     // commandMap["dataFF"] = []() { dataFF(); };
     commandMap["info"] = []() { ESPinfo(); };
+    commandMap["append"] = []() { AppendArrayTest(); };
+    commandMap["appendmap"] = []() { AppendMapTest(); };
     // commandMap["readP"] = []() { readPumpSpeed("/factory/preset.json"); };
     // commandMap["localRead"] = []() { localRead(); };
-    // commandMap["dataFactory"] = []() { dataFactoryTest(); };
+    // commandMap["dataFactory"] = []() { dataFactoryTest(); }; 
     commandMap["help"] = [&]() {
     Serial.println("Available commands:");
     for (const auto& command : commandMap) {
@@ -232,7 +234,7 @@ void CLI_Task(void *pvParameters) {
 void CLI_Call(){
     xTaskCreate(CLI_Task,
               "CLI_Task",
-              4096,
+              16384, //4096
               NULL,
               1,
               NULL);

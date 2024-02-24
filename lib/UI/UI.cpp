@@ -9,7 +9,7 @@
 #include "SensorDataFactory.h"
 #include <Init.h>
 #include "time.h"
-
+#include <Firebase_ESP_Client.h>
 
 #include <EEPROM.h>
 #define EEPROM_SIZE 128
@@ -273,7 +273,7 @@ void wifiCheckTask(void *pvParameters) {
       // networkStatus = NETWORK_CONNECTED; // Confirm that we are still connected
       fbKeepAlive();
     }
-    vTaskDelay(pdMS_TO_TICKS(10000)); // Check every 10 seconds
+    vTaskDelay(pdMS_TO_TICKS(60000)); // Check every 10 seconds
   }
 }
 

@@ -8,6 +8,8 @@ void beagleCLI();
 String processCommand(const String& receivedCommand); 
 void printFileContent();
 void printHexFileContent();
+
+void AppendArrayTest();
 // void listFilesInDirectory();
 void listFilesInDirectory(const String& directoryPath = "/");
 bool deleteAllFilesInLittleFS();

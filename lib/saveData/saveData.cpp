@@ -317,6 +317,7 @@ void firebaseSetup(){
 
 void fbKeepAlive(){
     fbdo.keepAlive(5, 5, 1);
+    Firebase.ready();
     // Serial.println(fbdo.httpConnected() ? "firebase connected" : "firebase not connected");
 }
 
@@ -455,4 +456,112 @@ void dataFF(void *pvParameters){
     Serial.print("Minimum free stack for dataFF task: ");
     Serial.println(uxHighWaterMark);
     vTaskDelete(fsUploadTaskHandler);
+}
+
+
+void AppendArrayTest()
+{
+
+    // Firebase.ready() should be called repeatedly to handle authentication tasks.
+
+        Serial.print("Commit a document (append array)... ");
+
+        // The dyamic array of write object firebase_firestore_document_write_t.
+        std::vector<struct firebase_firestore_document_write_t> writes;
+
+        // A write object that will be written to the document.
+        struct firebase_firestore_document_write_t transform_write;
+
+        // Set the write object write operation type.
+        // firebase_firestore_document_write_type_update,
+        // firebase_firestore_document_write_type_delete,
+        // firebase_firestore_document_write_type_transform
+        transform_write.type = firebase_firestore_document_write_type_transform;
+
+        // Set the document path of document to write (transform)
+        transform_write.document_transform.transform_document_path = "test_collection/test_document";
+
+        // Set a transformation of a field of the document.
+        struct firebase_firestore_document_write_field_transforms_t field_transforms;
+
+        // Set field path to write.
+        field_transforms.fieldPath = "appended_data";
+
+        // Set the transformation type.
+        // firebase_firestore_transform_type_set_to_server_value,
+        // firebase_firestore_transform_type_increment,
+        // firebase_firestore_transform_type_maaximum,
+        // firebase_firestore_transform_type_minimum,
+        // firebase_firestore_transform_type_append_missing_elements,
+        // firebase_firestore_transform_type_remove_all_from_array
+        field_transforms.transform_type = firebase_firestore_transform_type_append_missing_elements;
+
+        // For the usage of FirebaseJson, see examples/FirebaseJson/BasicUsage/Create_Edit_Parse/Create_Edit_Parse.ino
+        FirebaseJson content;
+
+        String txt = "Hello World! " + String(count);
+        content.set("values/[0]/integerValue", String(rand()).c_str());
+        content.set("values/[1]/stringValue", txt);
+
+        // Set the transformation content.
+        field_transforms.transform_content = content.raw();
+
+        // Add a field transformation object to a write object.
+        transform_write.document_transform.field_transforms.push_back(field_transforms);
+
+        // Add a write object to a write array.
+        writes.push_back(transform_write);
+
+        if (Firebase.Firestore.commitDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, writes /* dynamic array of firebase_firestore_document_write_t */, "" /* transaction */))
+            Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+        else
+            Serial.println(fbdo.errorReason());
+
+}
+
+void AppendMapTest()
+{
+
+    // Firebase.ready() should be called repeatedly to handle authentication tasks.
+
+        
+        count++;
+
+        Serial.print("Commit a document (append map value in document)... ");
+
+        // The dyamic array of write object firebase_firestore_document_write_t.
+        std::vector<struct firebase_firestore_document_write_t> writes;
+
+        // A write object that will be written to the document.
+        struct firebase_firestore_document_write_t update_write;
+
+        // Set the write object write operation type.
+        // firebase_firestore_document_write_type_update,
+        // firebase_firestore_document_write_type_delete,
+        // firebase_firestore_document_write_type_transform
+        update_write.type = firebase_firestore_document_write_type_update;
+
+        // Set the document content to write (transform)
+
+        FirebaseJson content;
+        String documentPath = "test_collection/test_document";
+
+        content.set("fields/myMap"+ String(count) +"/mapValue/fields/key" + String(count) + "/stringValue", "value" + String(count));
+
+        // Set the update document content
+        update_write.update_document_content = content.raw();
+
+        update_write.update_masks = "myMap"+ String(count) +".key" + String(count);
+
+        // Set the update document path
+        update_write.update_document_path = documentPath.c_str();
+
+        // Add a write object to a write array.
+        writes.push_back(update_write);
+
+        if (Firebase.Firestore.commitDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, writes /* dynamic array of firebase_firestore_document_write_t */, "" /* transaction */))
+            Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+        else
+            Serial.println(fbdo.errorReason());
+    
 }

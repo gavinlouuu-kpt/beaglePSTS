@@ -150,12 +150,12 @@ void loop()
         FirebaseJson content;
         String documentPath = "test_collection/test_document";
 
-        content.set("fields/myMap/mapValue/fields/key" + String(count) + "/stringValue", "value" + String(count));
+        content.set("fields/myMap"+ String(count) +"/mapValue/fields/key" + String(count) + "/stringValue", "value" + String(count));
 
         // Set the update document content
         update_write.update_document_content = content.raw();
 
-        update_write.update_masks = "myMap.key" + String(count);
+        update_write.update_masks = "myMap"+String(count)+".key" + String(count);
 
         // Set the update document path
         update_write.update_document_path = documentPath.c_str();
