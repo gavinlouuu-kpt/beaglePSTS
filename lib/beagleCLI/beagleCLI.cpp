@@ -9,6 +9,8 @@
 #include <string>
 #include <beagleCLI.h>
 
+#include <Init.h>
+
 extern std::map<String, std::function<void()>> commandMap;
 
 void ESPinfo(){
@@ -50,25 +52,25 @@ String readSerialInput() {
     return input;
 }
 
-// void printFileContent() {
-//     Serial.println("Enter the file name to open:");
-//     String fileName = readSerialInput();
-//     Serial.println("Opening file: " + fileName);
-
-//     File file = LittleFS.open("/" + fileName, "r");
-//     if (!file) {
-//         Serial.println("Failed to open file for reading");
-//         return;
-//     }
-
-//     Serial.println("Contents of the file:");
-//     while (file.available()) {
-//         Serial.write(file.read());
-//     }
-//     file.close();
-// }
-
 void printFileContent() {
+    Serial.println("Enter the file name to open:");
+    String fileName = readSerialInput();
+    Serial.println("Opening file: " + fileName);
+
+    File file = LittleFS.open("/" + fileName, "r");
+    if (!file) {
+        Serial.println("Failed to open file for reading");
+        return;
+    }
+
+    Serial.println("Contents of the file:");
+    while (file.available()) {
+        Serial.write(file.read());
+    }
+    file.close();
+}
+
+void printHexFileContent() {
     Serial.println("Enter the file name to open:");
     String fileName = readSerialInput(); // Make sure this function implements a way to read input from Serial.
     Serial.println("Opening file: " + fileName);
@@ -92,23 +94,57 @@ void printFileContent() {
     file.close();
 }
 
+// void listFilesInDirectory(const String& directoryPath) {
+//     File dir = LittleFS.open(directoryPath);
+//     if (!dir || !dir.isDirectory()) {
+//         Serial.println("Failed to open directory");
+//         return;
+//     }
+
+//     File file = dir.openNextFile();
+//     while (file) {
+//         if (file.isDirectory()) {
+//             Serial.print("DIR : ");
+//             Serial.println(file.name());
+//             // Recursively list nested directories
+//             listFilesInDirectory(file.name());
+//         } else {
+//             Serial.print("FILE: ");
+//             Serial.println(file.name());
+//         }
+//         file = dir.openNextFile();
+//     }
+// }
+
 void listFilesInDirectory(const String& directoryPath) {
     File dir = LittleFS.open(directoryPath);
-    if (!dir || !dir.isDirectory()) {
+    if (!dir) {
         Serial.println("Failed to open directory");
         return;
     }
+    if (!dir.isDirectory()) {
+        Serial.println("Not a directory");
+        return;
+    }
 
+    Serial.println("Listing directory: " + directoryPath);
     File file = dir.openNextFile();
     while (file) {
+        String filePath = file.name();
+        
+        // Ensure the file path starts with '/'
+        if (!filePath.startsWith("/")) {
+            filePath = "/" + filePath;
+        }
+
         if (file.isDirectory()) {
             Serial.print("DIR : ");
-            Serial.println(file.name());
+            Serial.println(filePath);
             // Recursively list nested directories
-            listFilesInDirectory(file.name());
+            listFilesInDirectory(filePath);
         } else {
             Serial.print("FILE: ");
-            Serial.println(file.name());
+            Serial.println(filePath);
         }
         file = dir.openNextFile();
     }
@@ -116,32 +152,6 @@ void listFilesInDirectory(const String& directoryPath) {
 
 
 
-// void listFilesInDirectory() {
-//     File root = LittleFS.open("/");
-
-//     if (!root) {
-//         Serial.println("Failed to open directory");
-//         return;
-//     }
-//     if (!root.isDirectory()) {
-//         Serial.println("Not a directory");
-//         return;
-//     }
-
-//     Serial.println("List of files:");
-//     File file = root.openNextFile();
-//     while (file) {
-//         if (file.isDirectory()) {
-//             Serial.print("DIR : ");
-//             Serial.println(file.name());
-//         } else {
-//             Serial.print("FILE: ");
-//             Serial.println(file.name());
-//         }
-//         file = root.openNextFile();
-//         delay(1);
-//     }
-// }
 
 
 bool deleteAllFilesInLittleFS() {
@@ -192,6 +202,7 @@ void cmdSetup() {
     // commandMap["fireGetSample"] = []() { fireGetSample(); };
     // commandMap["dataFF"] = []() { dataFF(); };
     commandMap["info"] = []() { ESPinfo(); };
+    commandMap["readP"] = []() { readPumpSpeed("/factory/preset.json"); };
     // commandMap["localRead"] = []() { localRead(); };
     // commandMap["dataFactory"] = []() { dataFactoryTest(); };
     commandMap["help"] = [&]() {

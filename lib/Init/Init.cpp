@@ -4,7 +4,7 @@
 #include <FS.h>
 #include <lvgl.h>
 
-// LittleFS system
+// // LittleFS system
 void writeFile(const char *path, const char *message) {
   File file = LittleFS.open(path, FILE_WRITE);
   if (!file) {
@@ -37,24 +37,34 @@ int readPumpSpeed(const char *path) {
   FirebaseJson json;
   json.setJsonData(fileContent);
 
+  // Create a FirebaseJsonData object to store the result
+  FirebaseJsonData jsonData;
+
   // Extract the pump_speed value
-  int pumpSpeed;
-  json.get("/pump_speed", pumpSpeed);
+  if (!json.get(jsonData, "/pump_speed")) {
+    Serial.println("Failed to read pump_speed from JSON");
+    return -1; // or handle the error as appropriate
+  }
+
+  // Assuming pump_speed is an integer
+  int pumpSpeed = jsonData.intValue;
+  Serial.println("Pump speed:");
+  Serial.print(pumpSpeed);
 
   return pumpSpeed;
 }
 
 
-// Factory Reset
-void FactoryReset(){
-    if (LittleFS.begin()) {
-        Serial.println("LittleFS mounted successfully");
-        writeFile("/config.json", "{}");
-    } else {
-        Serial.println("An error occurred during LittleFS mounting...");
-    }
+// // Factory Reset
+// void FactoryReset(){
+//     if (LittleFS.begin()) {
+//         Serial.println("LittleFS mounted successfully");
+//         writeFile("/config.json", "{}");
+//     } else {
+//         Serial.println("An error occurred during LittleFS mounting...");
+//     }
     
-}
+// }
 
 
 // Initialize Device
