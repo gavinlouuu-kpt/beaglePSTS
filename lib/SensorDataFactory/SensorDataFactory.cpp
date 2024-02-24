@@ -6,7 +6,7 @@
 #include <thread>
 #include <pinConfig.h>
 
-
+#include <Init.h>
 #include <vector>
 #include <chrono>
 #include <algorithm> // For std::copy
@@ -83,7 +83,8 @@ int SensorDataFactory::breath_check(){
 
 void SensorDataFactory::preSampling(){
     warmingInProgress = true;
-    ledcWrite(PumpPWM, 155); // turn on pump
+    Serial.println(pumpSpeed);
+    ledcWrite(PumpPWM, pumpSpeed); // turn on pump
     if (!bme_begin()) {
         Serial.println("Failed to initialize BME680 sensor.");
         return;

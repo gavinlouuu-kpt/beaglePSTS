@@ -3,7 +3,7 @@
 #include <LittleFS.h>
 #include <FS.h>
 #include <pinConfig.h>
-
+#include <Init.h>
 #include <FirebaseJson.h>
 #include <SD.h>
 #include <WiFi.h>
@@ -205,6 +205,7 @@ void setup()
     Wire.begin(C_SDA, C_SCL);
     pinSetup();
     pwmSetup();
+    configInit();
     cmdSetup();
 
 #if LV_USE_LOG != 0
