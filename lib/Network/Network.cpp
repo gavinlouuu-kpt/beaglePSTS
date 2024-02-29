@@ -3,9 +3,12 @@
 #include <WiFi.h>
 #include "WiFi.h"
 #include "time.h"
-#include "credential.h"
+#include <saveData.h>
+#include <Init.h>
+// #include "credential.h"
 #include <LittleFS.h>
 #include <FirebaseJson.h>
+// #include <addons/TokenHelper.h>
 
 
 WiFiManager::WiFiManager() {}
@@ -172,11 +175,20 @@ bool WiFiManager::connectToWiFi(const String& ssid, const String& password) {
         Serial.println("\nConnected!");
         Serial.print("IP Address: ");
         Serial.println(WiFi.localIP());
-        configTime(gmtOffset_sec, daylightOffset_sec, ntpServer); // Initialize NTP
+        configTime(gmtOffset_sec, daylightOffset_sec, "hk.pool.ntp.org","asia.pool.ntp.org","time.nist.gov"); // Initialize NTP
         return true; // Return true if connected
     } else {
         Serial.println("\nFailed to connect. Please try again.");
         return false; // Return false if not connected
+    }
+}
+
+void networkState(){
+    if (WiFi.status() != WL_CONNECTED) {
+      Serial.println("WiFi connection lost.");
+    } 
+    else {
+      Serial.println("WiFi connected.");
     }
 }
 

@@ -22,6 +22,7 @@ void firestoreUpload();
 void fbKeepAlive();
 
 void AppendMapTest();
+void fbOTA();
 // void dataFactoryTest();
 // void fsCall();
 

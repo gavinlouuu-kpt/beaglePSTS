@@ -201,7 +201,26 @@ void touch_calibrate()
 void setup()
 {
     Serial.begin( 115200 ); /* prepare for possible serial debug */
-    LittleFS.begin();
+    // Initialize LittleFS
+  if (!LittleFS.begin()) {
+    Serial.println("LittleFS mount failed, formatting...");
+    // If mounting fails, format LittleFS
+    if (LittleFS.format()) {
+      Serial.println("LittleFS formatted successfully");
+      // Try to mount again after formatting
+      if (LittleFS.begin()) {
+        Serial.println("LittleFS mounted successfully after format");
+      } else {
+        Serial.println("LittleFS mount failed after format");
+      }
+    } else {
+      Serial.println("LittleFS format failed");
+    }
+  } else {
+    Serial.println("LittleFS mounted successfully");
+  }
+
+
     Wire.begin(C_SDA, C_SCL);
     pinSetup();
     pwmSetup();

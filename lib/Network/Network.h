@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 //state management
+void networkState();
 class WiFiManager {
 public:
   WiFiManager();

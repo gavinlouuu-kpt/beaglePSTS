@@ -5,6 +5,7 @@
     "DATABASE_URL":"https://beaglepsts-88c3f-default-rtdb.asia-southeast1.firebasedatabase.app/",
     "FIREBASE_PROJECT_ID":"beaglepsts-88c3f",
     "API_KEY":"AIzaSyBX06Su-f2xPLp7ThCoOj-Q0Z4-JVJKcIM",
+    "STORAGE_BUCKET_ID":"beaglepsts-88c3f.appspot.com",
     "gmtOffset_sec":28800,
     "daylightOffset_sec":0,
     "ntpServer_1":"time.google.com"

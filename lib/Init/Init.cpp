@@ -11,6 +11,7 @@ String USER_EMAIL;
 String USER_PASSWORD;
 String DATABASE_URL;
 String API_KEY;
+String STORAGE_BUCKET_ID;
 long gmtOffset_sec;
 int daylightOffset_sec;
 
@@ -70,6 +71,7 @@ String readConfigValue(const char *path, const char *jsonPath) {
 void configInit(){
   pumpSpeed = readConfigValue("/config.json","/pump_speed").toInt();
   FIREBASE_PROJECT_ID = readConfigValue("/config.json", "/FIREBASE_PROJECT_ID");
+  STORAGE_BUCKET_ID = readConfigValue("/config.json", "/STORAGE_BUCKET_ID");
   USER_EMAIL = readConfigValue("/config.json", "/USER_EMAIL");
   USER_PASSWORD = readConfigValue("/config.json", "/USER_PASSWORD");
   DATABASE_URL = readConfigValue("/config.json", "/DATABASE_URL");	

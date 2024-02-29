@@ -307,6 +307,10 @@ void firebaseSetup(){
 
     // Limit the size of response payload to be collected in FirebaseData
     fbdo.setResponseSize(2048);
+    
+    /* Assign download buffer size in byte */
+    // Data to be downloaded will read as multiple chunks with this size, to compromise between speed and memory used for buffering.
+    config.fcs.download_buffer_size = 2048;
 
     Firebase.begin(&config, &auth);
 
@@ -320,6 +324,49 @@ void fbKeepAlive(){
     Firebase.ready();
     // Serial.println(fbdo.httpConnected() ? "firebase connected" : "firebase not connected");
 }
+
+// The Firebase Storage download callback function
+void fcsDownloadCallback(FCS_DownloadStatusInfo info)
+{
+    if (info.status == firebase_fcs_download_status_init)
+    {
+        Serial.printf("Downloading firmware %s (%d)\n", info.remoteFileName.c_str(), info.fileSize);
+    }
+    else if (info.status == firebase_fcs_download_status_download)
+    {
+        Serial.printf("Downloaded %d%s, Elapsed time %d ms\n", (int)info.progress, "%", info.elapsedTime);
+    }
+    else if (info.status == firebase_fcs_download_status_complete)
+    {
+        Serial.println("Update firmware completed.");
+        Serial.println();
+        Serial.println("Restarting...\n\n");
+        delay(2000);
+#if defined(ESP32) || defined(ESP8266)
+        ESP.restart();
+#elif defined(ARDUINO_RASPBERRY_PI_PICO_W)
+        rp2040.restart();
+#endif
+    }
+    else if (info.status == firebase_fcs_download_status_error)
+    {
+        Serial.printf("Download firmware failed, %s\n", info.errorMsg.c_str());
+    }
+}
+
+void fbOTA(){
+        // If you want to get download url to use with your own OTA update process using core update library,
+        // see Metadata.ino example
+        Serial.println("\nDownload firmware file...\n");
+        Serial.println("STORAGE_BUCKET_ID:"); //debug
+        Serial.print(STORAGE_BUCKET_ID);
+        Serial.println("firmware.bin"); //debug
+        
+        // This function will allocate 16k+ memory for internal SSL client.
+        if (!Firebase.Storage.downloadOTA(&fbdo, STORAGE_BUCKET_ID /* Firebase Storage bucket id */, "firmware.bin" /* path of firmware file stored in the bucket */, fcsDownloadCallback /* callback function */))
+            Serial.println(fbdo.errorReason());
+}
+
 
 // void localRead(){
 //     std::string macAddress = WiFi.macAddress().c_str();

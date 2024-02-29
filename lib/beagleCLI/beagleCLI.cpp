@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <string>
 #include <beagleCLI.h>
+#include <Firebase_ESP_Client.h>
+#include <Network.h>
 
 #include <Init.h>
 
@@ -203,6 +205,8 @@ void cmdSetup() {
     // commandMap["dataFF"] = []() { dataFF(); };
     commandMap["info"] = []() { ESPinfo(); };
     commandMap["appendmap"] = []() { AppendMapTest(); };
+    commandMap["fbota"] = []() { fbOTA(); };
+    commandMap["net"] = []() { networkState(); };
     // commandMap["readP"] = []() { readPumpSpeed("/factory/preset.json"); };
     // commandMap["localRead"] = []() { localRead(); };
     // commandMap["dataFactory"] = []() { dataFactoryTest(); }; 

@@ -15,6 +15,7 @@ extern String API_KEY;
 extern String DATABASE_URL;
 extern long gmtOffset_sec;
 extern int daylightOffset_sec;
+extern String STORAGE_BUCKET_ID;
 
 
 #endif
