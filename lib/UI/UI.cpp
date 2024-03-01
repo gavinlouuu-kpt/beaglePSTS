@@ -338,6 +338,8 @@ void buildBody() {
   lv_obj_set_size(bodyScreen, tft.width(), tft.height() - 34); //-34
   lv_obj_align(bodyScreen, LV_ALIGN_BOTTOM_MID, 0, 0);
 
+  lv_obj_remove_style(bodyScreen, NULL, LV_PART_SCROLLBAR | LV_STATE_ANY);
+
 
   spinner_warm = lv_spinner_create(lv_scr_act(), 1000, 50);
   lv_obj_add_event_cb(spinner_warm, db_btn_event_cb, LV_EVENT_ALL, NULL);
