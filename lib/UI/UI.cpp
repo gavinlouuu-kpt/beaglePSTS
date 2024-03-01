@@ -30,6 +30,7 @@ lv_obj_t *spinbox;
 lv_style_t border_style;
 lv_style_t popupBox_style;
 lv_obj_t *timeLabel;
+lv_obj_t *device_mac;
 lv_obj_t *settings;
 lv_obj_t *tuning;
 lv_obj_t *settingBtn;
@@ -396,10 +397,15 @@ void buildBody() {
   lv_obj_set_size(save_state, 70, 70);
   lv_obj_align(save_state, LV_ALIGN_CENTER, 95, 5);
   lv_obj_add_flag(save_state, LV_OBJ_FLAG_HIDDEN);
-  // save label
-  // lv_obj_t *label_save = lv_label_create(bodyScreen); /*Add a label to the button*/
-  // lv_label_set_text(label_save, "3. Save");  /*Set the labels text*/
-  // lv_obj_align(label_save, LV_ALIGN_CENTER, 90, -75);
+  
+  // result display
+  device_mac = lv_label_create(bodyScreen);
+  // lv_obj_add_event_cb(spinner_save, db_btn_event_cb, LV_EVENT_ALL, NULL);
+  lv_label_set_text(device_mac, WiFi.macAddress().c_str());  /*Set the labels text*/
+  lv_obj_set_size(device_mac, 140, 30);
+  lv_obj_align(device_mac, LV_ALIGN_BOTTOM_LEFT, -10, 30);
+  // lv_obj_add_flag(device_mac, LV_OBJ_FLAG_HIDDEN);
+  
 }
 
 
