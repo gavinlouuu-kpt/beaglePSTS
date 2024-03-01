@@ -36,6 +36,9 @@ lv_obj_t *settingBtn;
 lv_obj_t *testingBtn;
 lv_obj_t *tuningBtn;
 lv_obj_t *db_settingBtn;
+lv_obj_t *samplingBtn;
+lv_obj_t *save_state;
+lv_obj_t *save_fail;
 lv_obj_t *spinner_warm;
 lv_obj_t *spinner_huff;
 lv_obj_t *spinner_save;
@@ -372,43 +375,158 @@ void buildBody() {
   
   lv_obj_add_event_cb(db_settingBtn, db_btn_event_cb, LV_EVENT_ALL, NULL);
   lv_obj_t *label = lv_label_create(db_settingBtn); /*Add a label to the button*/
-  lv_label_set_text(label, LV_SYMBOL_OK);  /*Set the labels text*/
+  lv_label_set_text(label, "Start");  /*Set the labels text*/
   lv_obj_center(label);
+
+  // huff action
+  samplingBtn = lv_btn_create(bodyScreen);
+  lv_obj_set_size(samplingBtn, 60, 30);
+  lv_obj_align(samplingBtn, LV_ALIGN_CENTER, 0, 0);
+  lv_obj_add_flag(samplingBtn, LV_OBJ_FLAG_HIDDEN);
+  
+  lv_obj_add_event_cb(samplingBtn, sampling_btn_event_cb, LV_EVENT_ALL, NULL);
+  lv_obj_t *samplelabel = lv_label_create(samplingBtn); /*Add a label to the button*/
+  lv_label_set_text(samplelabel, LV_SYMBOL_RIGHT);  /*Set the labels text*/
+  lv_obj_center(samplelabel);
+
+  // result display
+  save_state = lv_label_create(bodyScreen);
+  // lv_obj_add_event_cb(spinner_save, db_btn_event_cb, LV_EVENT_ALL, NULL);
+  lv_label_set_text(save_state, "Success");  /*Set the labels text*/
+  lv_obj_set_size(save_state, 70, 70);
+  lv_obj_align(save_state, LV_ALIGN_CENTER, 95, 5);
+  lv_obj_add_flag(save_state, LV_OBJ_FLAG_HIDDEN);
+  // save label
+  // lv_obj_t *label_save = lv_label_create(bodyScreen); /*Add a label to the button*/
+  // lv_label_set_text(label_save, "3. Save");  /*Set the labels text*/
+  // lv_obj_align(label_save, LV_ALIGN_CENTER, 90, -75);
 }
 
+
+void sampling_btn_event_cb(lv_event_t *e) {
+  lv_event_code_t code = lv_event_get_code(e);
+  lv_obj_t *btn = lv_event_get_target(e);
+
+  if (code == LV_EVENT_CLICKED && btn == samplingBtn) {
+    // lv_obj_add_flag(db_settingBtn,LV_OBJ_FLAG_HIDDEN);
+    samplingInProgress = true;
+    readyToSample = false;
+    // firestoreUpload(); // Assume this is now non-blocking or called asynchronously
+  }
+
+}
 
 void db_btn_event_cb(lv_event_t *e) {
   lv_event_code_t code = lv_event_get_code(e);
   lv_obj_t *btn = lv_event_get_target(e);
 
   if (code == LV_EVENT_CLICKED && btn == db_settingBtn) {
-    
+    // lv_obj_add_flag(db_settingBtn,LV_OBJ_FLAG_HIDDEN);
+    Serial.println(busy);
+    busy = true;
     firestoreUpload(); // Assume this is now non-blocking or called asynchronously
-    
   }
 
 }
 
-void check_upload_status(lv_timer_t * timer) {
-    // You don't necessarily need to use the timer parameter if not needed
-    (void)timer; // This line is just to avoid unused variable warnings
-
-    if (warmingInProgress) {
-        lv_obj_clear_flag(spinner_warm, LV_OBJ_FLAG_HIDDEN); // Show spinner_huff
+void toggle_visibility(lv_obj_t* obj, bool condition) {
+    if (condition) {
+        lv_obj_clear_flag(obj, LV_OBJ_FLAG_HIDDEN);
     } else {
-        lv_obj_add_flag(spinner_warm, LV_OBJ_FLAG_HIDDEN); // Hide spinner_huff after the operation
-    }
-    if (samplingInProgress) {
-        lv_obj_clear_flag(spinner_huff, LV_OBJ_FLAG_HIDDEN); // Show spinner_huff
-    } else {
-        lv_obj_add_flag(spinner_huff, LV_OBJ_FLAG_HIDDEN); // Hide spinner_huff after the operation
-    }
-    if (uploadInProgress) {
-        lv_obj_clear_flag(spinner_save, LV_OBJ_FLAG_HIDDEN); // Show spinner_huff
-    } else {
-        lv_obj_add_flag(spinner_save, LV_OBJ_FLAG_HIDDEN); // Hide spinner_huff after the operation
+        lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
     }
 }
+
+extern UploadState uploadState;
+
+void check_upload_status(lv_timer_t * timer) {
+    (void)timer; // Avoid unused variable warnings
+
+    // Control visibility based on the process states
+    toggle_visibility(spinner_warm, warmingInProgress);
+    toggle_visibility(spinner_huff, samplingInProgress);
+    toggle_visibility(spinner_save, uploadInProgress);
+    toggle_visibility(db_settingBtn, !busy); // Note the negation here, as the logic is reversed
+    toggle_visibility(samplingBtn, readyToSample);
+    
+}
+
+static void resetUploadState(lv_timer_t * timer) {
+    // Cast and retrieve the label if needed
+    // lv_obj_t* label = (lv_obj_t*) timer->user_data;
+
+    uploadState = NotStarted;
+
+    // Optionally, hide the label again or update its text
+    lv_obj_add_flag(save_state, LV_OBJ_FLAG_HIDDEN);
+
+    // If the timer should only run once, you can delete it here
+    lv_timer_del(timer);
+}
+
+
+void updateUploadState(lv_timer_t * timer){
+  switch(uploadState) {
+        case NotStarted:{
+            // Hide the label or indicate that upload hasn't started
+            lv_obj_add_flag(save_state, LV_OBJ_FLAG_HIDDEN);
+            break;
+        }
+        case Success: {
+            lv_obj_clear_flag(save_state, LV_OBJ_FLAG_HIDDEN);
+            lv_label_set_text(save_state, "Upload Success");
+            // Create a one-shot timer to reset the state after 10 seconds
+            lv_timer_t* reset_timer = lv_timer_create(resetUploadState, 10000, NULL);
+            // Optionally, set the label color to green or another indicator of success
+            break;
+        }
+            // Show the label and indicate success
+            
+        case Failure: {
+            // Show the label and indicate failure
+            lv_obj_clear_flag(save_state, LV_OBJ_FLAG_HIDDEN);
+            lv_label_set_text(save_state, "Upload Failed");
+            // Create a one-shot timer to reset the state after 10 seconds
+            lv_timer_create(resetUploadState, 10000, NULL);
+            
+            break;
+        }
+ 
+    }
+}
+// void check_upload_status(lv_timer_t * timer) {
+//     // You don't necessarily need to use the timer parameter if not needed
+//     (void)timer; // This line is just to avoid unused variable warnings
+
+//     if (warmingInProgress) {
+//         lv_obj_clear_flag(spinner_warm, LV_OBJ_FLAG_HIDDEN); // Show spinner_huff
+//     } else {
+//         lv_obj_add_flag(spinner_warm, LV_OBJ_FLAG_HIDDEN); // Hide spinner_huff after the operation
+//     }
+//     if (samplingInProgress) {
+//         lv_obj_clear_flag(spinner_huff, LV_OBJ_FLAG_HIDDEN); // Show spinner_huff
+//     } else {
+//         lv_obj_add_flag(spinner_huff, LV_OBJ_FLAG_HIDDEN); // Hide spinner_huff after the operation
+//     }
+//     if (uploadInProgress) {
+//         lv_obj_clear_flag(spinner_save, LV_OBJ_FLAG_HIDDEN); // Show spinner_huff
+//     } else {
+//         lv_obj_add_flag(spinner_save, LV_OBJ_FLAG_HIDDEN); // Hide spinner_huff after the operation
+//     }
+//     if (busy)
+//     {
+//       lv_obj_add_flag(db_settingBtn, LV_OBJ_FLAG_HIDDEN);
+//     } else {
+//       lv_obj_clear_flag(db_settingBtn, LV_OBJ_FLAG_HIDDEN);
+//     }
+//     if (readyToSample)
+//     {
+//       lv_obj_clear_flag(samplingBtn, LV_OBJ_FLAG_HIDDEN);
+//     } else {
+//       lv_obj_add_flag(samplingBtn, LV_OBJ_FLAG_HIDDEN);
+//     }
+    
+// }
   
 
 void buildSettings() {

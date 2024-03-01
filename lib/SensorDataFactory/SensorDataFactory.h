@@ -8,6 +8,7 @@
 
 extern volatile bool warmingInProgress;
 extern volatile bool samplingInProgress;
+extern volatile bool readyToSample;
 
 void testBreath();
 
@@ -22,7 +23,7 @@ public:
 private:
     void performSampling(std::vector<float>& conVec, std::vector<uint32_t>& dataVec);
     static int dummyData();
-    
+    void waitUser();
     #define SEALEVELPRESSURE_HPA (1013.25)
     bool bme_begin();
     void preSampling();

@@ -10,6 +10,9 @@
 #include <vector>
 #include <chrono>
 #include <algorithm> // For std::copy
+#include <saveData.h>
+#include <UI.h>
+#include <TFT_eSPI.h>
 
 volatile bool warmingInProgress = false;
 
@@ -81,6 +84,8 @@ int SensorDataFactory::breath_check(){
     }
 }
 
+volatile bool readyToSample = false;
+
 void SensorDataFactory::preSampling(){
     warmingInProgress = true;
     Serial.println(pumpSpeed);
@@ -91,7 +96,7 @@ void SensorDataFactory::preSampling(){
     }
     // create a timer for 30 seconds to let the sensor warmup
     auto start = std::chrono::steady_clock::now();
-    auto end = start + std::chrono::seconds(30);
+    auto end = start + std::chrono::seconds(15);
     Serial.println("Warming up sensor: ");
     while(std::chrono::steady_clock::now() < end){
         if (bme.performReading()){
@@ -100,6 +105,7 @@ void SensorDataFactory::preSampling(){
         }
     }
     warmingInProgress = false;
+    readyToSample = true;
 }
 
 void SensorDataFactory::postSampling(){
@@ -148,7 +154,7 @@ void SensorDataFactory::performSampling(std::vector<float>& conVec, std::vector<
 
 //create a loop for a minute where dummyData is called every 60ms 
     auto start = steady_clock::now();
-    auto end = start + seconds(60);
+    auto end = start + seconds(30);
     dataVec.clear(); // Make sure it's empty before filling
     Serial.println("Sampling: ");
     while(steady_clock::now() < end){
@@ -197,12 +203,30 @@ void SensorDataFactory::performSampling(std::vector<float>& conVec, std::vector<
 //     }
 
 // }
+void SensorDataFactory::waitUser(){
+    //create a timer for 60 seconds to let the user press the button to start sampling if not timeout
+    
+    // auto start = std::chrono::steady_clock::now();
+    // auto end = start + std::chrono::seconds(60);
+    // while(std::chrono::steady_clock::now() < end){
+    //     if(samplingInProgress){
+    //         return;
+    //     } 
+    // }
+    // busy = false;
+
+    while(!samplingInProgress){
+        // Sleep for a short duration to prevent busy waiting
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+}
 
 SensorData SensorDataFactory::createSensorData() {
     std::string infoString = "T_s, RH_s, Pa_s, T_e, RH_e,Pa_e, t_ms";
     std::vector<float> conVec;
     std::vector<uint32_t> dataVec;
     preSampling();
+    waitUser();
     performSampling(conVec, dataVec);
     return SensorData(infoString, conVec, dataVec);
 }

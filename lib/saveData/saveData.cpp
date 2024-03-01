@@ -15,6 +15,9 @@
 #include <SensorDataFactory.h>
 #include <lvgl.h>
 
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME680.h>
+
 // void checkFile(char userID[]) {
 //     const char* macAddress = WiFi.macAddress().c_str(); // Example MAC address
 //     char filePath[64];
@@ -275,7 +278,7 @@ void populateJsonArray(FirebaseJsonArray& jsonArray, int* list, int length) {
 // Provide the token generation process info.
 #include <addons/TokenHelper.h>
 
-
+volatile bool busy;
 /* 1. Define the WiFi credentials */
 // Define Firebase Data object
 FirebaseData fbdo;
@@ -504,6 +507,7 @@ volatile bool uploadInProgress = false;
 //     Serial.println(uxHighWaterMark);
 //     vTaskDelete(fsUploadTaskHandler);
 // }
+UploadState uploadState = NotStarted;
 
 void dataFF(void *pvParameters){
     Serial.println("Enter dataFF");
@@ -563,17 +567,22 @@ void dataFF(void *pvParameters){
 
     writes.push_back(update_write);
 
-    if (Firebase.Firestore.commitDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, writes /* dynamic array of firebase_firestore_document_write_t */, "" /* transaction */))
+    if (Firebase.Firestore.commitDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, writes /* dynamic array of firebase_firestore_document_write_t */, "" /* transaction */)){
         Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
-    else
+        uploadState = Success;
+    }   
+    else{
         Serial.println(fbdo.errorReason());
-
+        uploadState = Failure;
+    }
+    updateUploadState(NULL);
+        
             // if (Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, documentPath.c_str(), content.raw(), updateMask /* updateMask */))
             //     Serial.println("ok");
                 
             // else
             //     Serial.println(fbdo.errorReason());
-
+    busy = false;
     uploadInProgress = false;
     UBaseType_t uxHighWaterMark;
     uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);

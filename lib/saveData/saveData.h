@@ -3,10 +3,18 @@
 #define SAVEDATA_H
 
 #include <Arduino.h>
+#include <lvgl.h>
 // #include <credential.h>
 
 extern volatile bool uploadInProgress;
+extern volatile bool busy;
 
+enum UploadState {
+    NotStarted,
+    Success,
+    Failure
+};
+void updateUploadState(lv_timer_t *timer);
 // void checkFile(char userID[]);
 // void fsInit();
 // void addDataJSON(char userID[], FirebaseJsonArray& nestedData);

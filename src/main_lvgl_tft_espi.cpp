@@ -15,6 +15,7 @@
 #include <vector>
 #include <Hardware.h>
 #include <beagleCLI.h>
+#include <saveData.h>
 // #include <Network.h>
 #include <UI.h>
 
@@ -271,11 +272,12 @@ void setup()
     buildPWMsgBox();
     buildBody();
     buildSettings();
+    delay(10);
     tryPreviousNetwork();
     networkCheck();
     buildTuning();
-    lv_timer_t * timer = lv_timer_create(check_upload_status, 1000, NULL); // 1000 ms interval
- 
+    lv_timer_t * timer = lv_timer_create(check_upload_status, 500, NULL); // 1000 ms interval
+    // lv_timer_t * uploadTimer = lv_timer_create(updateUploadState, 500, NULL); 
     // Serial.println( "Setup done" );
 }
 
