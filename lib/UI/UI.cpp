@@ -190,7 +190,8 @@ void testBreath() {
 void test_check_breath(void *pvParameters) {
   SensorDataFactory sensorDataFactory;
   ledcWrite(PumpPWM, 155); // turn on pump
-  int breath = sensorDataFactory.breath_check();
+  // int breath = sensorDataFactory.breath_check();
+  sensorDataFactory.dataStream();
   ledcWrite(PumpPWM, 0); // turn off pump
   vTaskDelete(NULL);
 }
@@ -200,7 +201,7 @@ void test_btn_event_cb(lv_event_t *e){
   lv_obj_t *btn = lv_event_get_target(e);
   if (code == LV_EVENT_CLICKED && btn == testingBtn) {
     // fbOTA();
-    // testBreath();
+    testBreath();
     // testFactory.dataStream();
   }
 }

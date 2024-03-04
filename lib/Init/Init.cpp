@@ -4,6 +4,7 @@
 #include <FS.h>
 #include <lvgl.h>
 #include <string>
+#include <pinConfig.h>
 
 int pumpSpeed;
 String FIREBASE_PROJECT_ID;
@@ -69,6 +70,7 @@ String readConfigValue(const char *path, const char *jsonPath) {
 
 
 void configInit(){
+  ledcWrite(PumpPWM, 0); // turn off pump
   pumpSpeed = readConfigValue("/config.json","/pump_speed").toInt();
   FIREBASE_PROJECT_ID = readConfigValue("/config.json", "/FIREBASE_PROJECT_ID");
   STORAGE_BUCKET_ID = readConfigValue("/config.json", "/STORAGE_BUCKET_ID");
