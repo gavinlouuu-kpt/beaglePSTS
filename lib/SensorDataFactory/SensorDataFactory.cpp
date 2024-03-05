@@ -26,7 +26,7 @@ bool SensorDataFactory::bme_begin() {
     bme.setTemperatureOversampling(BME680_OS_8X);
     bme.setHumidityOversampling(BME680_OS_2X);
     bme.setPressureOversampling(BME680_OS_4X);
-    bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
+    bme.setIIRFilterSize(BME680_FILTER_SIZE_1);
     bme.setGasHeater(450, 5); // 320*C for 150 ms
     return true;
 }
@@ -97,8 +97,20 @@ void SensorDataFactory::preSampling(){
     auto end = start + std::chrono::seconds(30);
     Serial.println("Warming up sensor: ");
     while(std::chrono::steady_clock::now() < end){
-        if (bme.performReading()){
-            Serial.print(">Warming:");
+        bme.setGasHeater(200,5);
+        if(bme.performReading()){
+            
+            Serial.print(">200_Warming:");
+            Serial.println(bme.gas_resistance);
+        }
+        bme.setGasHeater(300,5);
+        if(bme.performReading()){
+            Serial.print(">300_Warming:");
+            Serial.println(bme.gas_resistance);
+        }
+        bme.setGasHeater(400,5);
+        if(bme.performReading()){
+            Serial.print(">400_Warming:");
             Serial.println(bme.gas_resistance);
         }
     }
@@ -122,16 +134,42 @@ void SensorDataFactory::dataStream(){
     ledcWrite(PumpPWM, pumpSpeed); // turn on pump
     bme_begin();
     while(!busy){
+    //     if (bme.performReading()) {
+    //     bme.setGasHeater(500,5);
+    //     // Serial.println(bme.temperature);//Serial.print(",");
+    //     // Serial.print(">Humidity:");Serial.println(bme.humidity);//Serial.print(",");
+    //     Serial.print(">500 Res:");Serial.println(bme.gas_resistance);
+    // }
+        bme.setGasHeater(200,5);
         if (bme.performReading()) {
         // Serial.println(bme.temperature);//Serial.print(",");
-        Serial.print(">Humidity:");Serial.println(bme.humidity);//Serial.print(",");
-        // Serial.println(bme.pressure);//Serial.print(",");
-        Serial.print(">Gas Res:");Serial.println(bme.gas_resistance);
+        // Serial.print(">Humidity:");Serial.println(bme.humidity);//Serial.print(",");
+        Serial.print(">200 Res:");Serial.println(bme.gas_resistance);
     }
+     
+        bme.setGasHeater(300,5);
+        if (bme.performReading()) {
+        // Serial.println(bme.temperature);//Serial.print(",");
+        // Serial.print(">Humidity:");Serial.println(bme.humidity);//Serial.print(",");
+        Serial.print(">300 Res:");Serial.println(bme.gas_resistance);
+    }
+        bme.setGasHeater(400,5);
+        if (bme.performReading()) {
+        // Serial.println(bme.temperature);//Serial.print(",");
+        // Serial.print(">Humidity:");Serial.println(bme.humidity);//Serial.print(",");
+        Serial.print(">400 Res:");Serial.println(bme.gas_resistance);
+    }
+        
+    // if (bme.performReading()) {
+    //     bme.setGasHeater(100,5);
+    //     // Serial.println(bme.temperature);//Serial.print(",");
+    //     // Serial.print(">Humidity:");Serial.println(bme.humidity);//Serial.print(",");
+    //     Serial.print(">100 Res:");Serial.println(bme.gas_resistance);
+    // }
     }
 }
 
-void SensorDataFactory::performSampling(std::vector<float>& conVec, std::vector<uint32_t>& dataVec) {
+void SensorDataFactory::performSampling(std::vector<float>& conVec, std::vector<uint32_t>& dataVec200, std::vector<uint32_t>& dataVec300, std::vector<uint32_t>& dataVec400) {
     using namespace std::chrono;
     // preSampling();
     samplingInProgress = true;
@@ -147,14 +185,28 @@ void SensorDataFactory::performSampling(std::vector<float>& conVec, std::vector<
 //create a loop for a minute where dummyData is called every 60ms 
     auto start = steady_clock::now();
     auto end = start + seconds(30);
-    dataVec.clear(); // Make sure it's empty before filling
+    dataVec200.clear(); // Make sure it's empty before filling
+    dataVec300.clear(); 
+    dataVec400.clear(); 
     Serial.println("Sampling: ");
     while(steady_clock::now() < end){
+        bme.setGasHeater(200,5);
         if(bme.performReading()){
-        dataVec.push_back(bme.gas_resistance);
-        Serial.print(">Sampling:");
-        Serial.println(bme.gas_resistance);
-        // std::this_thread::sleep_for(std::chrono::milliseconds(60));
+            dataVec200.push_back(bme.gas_resistance);
+            Serial.print(">200_Sampling:");
+            Serial.println(bme.gas_resistance);
+        }
+        bme.setGasHeater(300,5);
+        if(bme.performReading()){
+            dataVec300.push_back(bme.gas_resistance);
+            Serial.print(">300_Sampling:");
+            Serial.println(bme.gas_resistance);
+        }
+        bme.setGasHeater(400,5);
+        if(bme.performReading()){
+            dataVec400.push_back(bme.gas_resistance);
+            Serial.print(">400_Sampling:");
+            Serial.println(bme.gas_resistance);
         }
     }
     auto now = std::chrono::steady_clock::now();
@@ -177,11 +229,21 @@ void SensorDataFactory::waitUser(){
 
     while(!samplingInProgress){
         // Sleep for a short duration to prevent busy waiting
+                bme.setGasHeater(200,5);
         if(bme.performReading()){
-        
-        Serial.print(">Waiting:");
-        Serial.println(bme.gas_resistance);
-        // std::this_thread::sleep_for(std::chrono::milliseconds(60));
+            
+            Serial.print(">200_Warming:");
+            Serial.println(bme.gas_resistance);
+        }
+        bme.setGasHeater(300,5);
+        if(bme.performReading()){
+            Serial.print(">300_Warming:");
+            Serial.println(bme.gas_resistance);
+        }
+        bme.setGasHeater(400,5);
+        if(bme.performReading()){
+            Serial.print(">400_Warming:");
+            Serial.println(bme.gas_resistance);
         }
         // std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -190,10 +252,10 @@ void SensorDataFactory::waitUser(){
 SensorData SensorDataFactory::createSensorData() {
     std::string infoString = "T_s, RH_s, Pa_s, T_e, RH_e,Pa_e, t_ms";
     std::vector<float> conVec;
-    std::vector<uint32_t> dataVec;
+    std::vector<uint32_t> dataVec200, dataVec300, dataVec400;
     bme_begin();
     preSampling();
     waitUser();
-    performSampling(conVec, dataVec);
-    return SensorData(infoString, conVec, dataVec);
+    performSampling(conVec, dataVec200, dataVec300, dataVec400);
+    return SensorData(infoString, conVec, dataVec200, dataVec300, dataVec400);
 }

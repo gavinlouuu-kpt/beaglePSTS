@@ -272,13 +272,9 @@ void networkCheck(){
 
 void wifiCheckTask(void *pvParameters) {
   for (;;) {
-    if (WiFi.status() != WL_CONNECTED) {
-      // Serial.println("WiFi connection lost.");
-      // WiFi.disconnect();
-    } else {
-      // networkStatus = NETWORK_CONNECTED; // Confirm that we are still connected
-      fbKeepAlive();
-    }
+    if (WiFi.status() == WL_CONNECTED) {
+    fbKeepAlive();
+    } 
     vTaskDelay(pdMS_TO_TICKS(60000)); // Check every 10 seconds
   }
 }
@@ -376,6 +372,7 @@ void buildBody() {
   db_settingBtn = lv_btn_create(bodyScreen);
   lv_obj_set_size(db_settingBtn, 60, 30);
   lv_obj_align(db_settingBtn, LV_ALIGN_CENTER, 0, 60);
+  lv_obj_add_flag(db_settingBtn, LV_OBJ_FLAG_HIDDEN);
   
   lv_obj_add_event_cb(db_settingBtn, db_btn_event_cb, LV_EVENT_ALL, NULL);
   lv_obj_t *label = lv_label_create(db_settingBtn); /*Add a label to the button*/
@@ -455,8 +452,13 @@ void check_upload_status(lv_timer_t * timer) {
     toggle_visibility(spinner_warm, warmingInProgress);
     toggle_visibility(spinner_huff, samplingInProgress);
     toggle_visibility(spinner_save, uploadInProgress);
-    toggle_visibility(db_settingBtn, !busy); // Note the negation here, as the logic is reversed
+    // toggle_visibility(db_settingBtn, !busy); // Note the negation here, as the logic is reversed
     toggle_visibility(samplingBtn, readyToSample);
+    if (WiFi.status() != WL_CONNECTED) {
+      lv_obj_add_flag(db_settingBtn, LV_OBJ_FLAG_HIDDEN);
+    } else {
+      toggle_visibility(db_settingBtn, !busy);
+    }
     
 }
 
@@ -503,39 +505,6 @@ void updateUploadState(lv_timer_t * timer){
  
     }
 }
-// void check_upload_status(lv_timer_t * timer) {
-//     // You don't necessarily need to use the timer parameter if not needed
-//     (void)timer; // This line is just to avoid unused variable warnings
-
-//     if (warmingInProgress) {
-//         lv_obj_clear_flag(spinner_warm, LV_OBJ_FLAG_HIDDEN); // Show spinner_huff
-//     } else {
-//         lv_obj_add_flag(spinner_warm, LV_OBJ_FLAG_HIDDEN); // Hide spinner_huff after the operation
-//     }
-//     if (samplingInProgress) {
-//         lv_obj_clear_flag(spinner_huff, LV_OBJ_FLAG_HIDDEN); // Show spinner_huff
-//     } else {
-//         lv_obj_add_flag(spinner_huff, LV_OBJ_FLAG_HIDDEN); // Hide spinner_huff after the operation
-//     }
-//     if (uploadInProgress) {
-//         lv_obj_clear_flag(spinner_save, LV_OBJ_FLAG_HIDDEN); // Show spinner_huff
-//     } else {
-//         lv_obj_add_flag(spinner_save, LV_OBJ_FLAG_HIDDEN); // Hide spinner_huff after the operation
-//     }
-//     if (busy)
-//     {
-//       lv_obj_add_flag(db_settingBtn, LV_OBJ_FLAG_HIDDEN);
-//     } else {
-//       lv_obj_clear_flag(db_settingBtn, LV_OBJ_FLAG_HIDDEN);
-//     }
-//     if (readyToSample)
-//     {
-//       lv_obj_clear_flag(samplingBtn, LV_OBJ_FLAG_HIDDEN);
-//     } else {
-//       lv_obj_add_flag(samplingBtn, LV_OBJ_FLAG_HIDDEN);
-//     }
-    
-// }
   
 
 void buildSettings() {

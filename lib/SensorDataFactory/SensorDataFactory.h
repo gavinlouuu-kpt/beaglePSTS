@@ -21,7 +21,7 @@ public:
     
 
 private:
-    void performSampling(std::vector<float>& conVec, std::vector<uint32_t>& dataVec);
+    void performSampling(std::vector<float>& conVec, std::vector<uint32_t>& dataVec200, std::vector<uint32_t>& dataVec300, std::vector<uint32_t>& dataVec400);
     static int dummyData();
     void waitUser();
     #define SEALEVELPRESSURE_HPA (1013.25)

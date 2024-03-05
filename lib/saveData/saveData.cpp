@@ -544,15 +544,21 @@ void dataFF(void *pvParameters){
     std::string jsonKey = std::string("fields/t") + currentTime;
     std::string info = jsonKey + "/mapValue/fields/info/stringValue";
     std::string condition = jsonKey + "/mapValue/fields/condition/stringValue";
-    std::string data = jsonKey + "/mapValue/fields/data/stringValue";
+    std::string data_200 = jsonKey + "/mapValue/fields/data_200/stringValue";
+    std::string data_300 = jsonKey + "/mapValue/fields/data_300/stringValue";
+    std::string data_400 = jsonKey + "/mapValue/fields/data_400/stringValue";
             
     std::string infoString = sensorData.getInfoString();
     std::string conString = vectorToString(sensorData.getConVec()); 
-    std::string dataString = vectorToString(sensorData.getDataVec()); 
+    std::string dataString_200 = vectorToString(sensorData.getDataVec200()); 
+    std::string dataString_300 = vectorToString(sensorData.getDataVec300()); 
+    std::string dataString_400 = vectorToString(sensorData.getDataVec400()); 
             
     content.set(info, infoString.c_str());
     content.set(condition, conString.c_str());
-    content.set(data, dataString.c_str());
+    content.set(data_200, dataString_200.c_str());
+    content.set(data_300, dataString_300.c_str());
+    content.set(data_400, dataString_400.c_str());
 
     update_write.update_document_content = content.raw();
 
