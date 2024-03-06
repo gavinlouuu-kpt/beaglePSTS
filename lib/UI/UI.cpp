@@ -29,6 +29,7 @@ lv_obj_t *spinbox;
 
 lv_style_t border_style;
 lv_style_t popupBox_style;
+lv_obj_t *batLabel;
 lv_obj_t *timeLabel;
 lv_obj_t *device_mac;
 lv_obj_t *settings;
@@ -270,8 +271,25 @@ void networkCheck(){
     &ntCheckTaskHandler);               /* Task handle */
 }
 
+void batRead() {
+  char buf[64]; // Buffer to hold the string
+
+  digitalWrite(VBAT, LOW);
+  delay(5);
+  float voltageWithoutEnable = analogRead(BAT)  /* Conversion Factor */;
+
+
+  // Format the string to display
+  snprintf(buf, sizeof(buf), "VBAT: %.0f", voltageWithoutEnable);
+
+  // Update the label text
+  lv_label_set_text(batLabel, buf);
+}
+
+
 void wifiCheckTask(void *pvParameters) {
   for (;;) {
+    batRead(); // utilise minute timer to read battery level
     if (WiFi.status() == WL_CONNECTED) {
     fbKeepAlive();
     } 
@@ -405,6 +423,12 @@ void buildBody() {
   lv_obj_set_size(device_mac, 140, 30);
   lv_obj_align(device_mac, LV_ALIGN_BOTTOM_LEFT, -10, 30);
   // lv_obj_add_flag(device_mac, LV_OBJ_FLAG_HIDDEN);
+
+  // battery display
+  batLabel = lv_label_create(bodyScreen);
+  lv_label_set_text(batLabel, "Battery: ");
+  lv_obj_set_size(batLabel, 100, 30);
+  lv_obj_align(batLabel, LV_ALIGN_BOTTOM_RIGHT, 0, 30);
   
 }
 
@@ -789,5 +813,31 @@ void updateLocalTime() {
   hourMinWithSymbol += "   ";
   hourMinWithSymbol += LV_SYMBOL_WIFI;
   lv_label_set_text(timeLabel, hourMinWithSymbol.c_str());
+}
+
+void powerTask() {
+  xTaskCreate(powerMan,
+              "autoOffTask",
+              1024, //original 2048
+              NULL,
+              1,
+              NULL);
+}
+
+
+void powerMan(void *pvParameters) {
+  while (1) {
+    if (!busy) {
+      uint64_t start = esp_timer_get_time();
+      while (!busy && (esp_timer_get_time() - start) < 300000000) { // 5 minutes
+        vTaskDelay(pdMS_TO_TICKS(10000)); // Check every 10 seconds if condition changes
+      }
+      if (!busy) { // Recheck busy flag after delay period
+        esp_sleep_enable_timer_wakeup(300000000); // 5 minutes
+        esp_deep_sleep_start();
+      }
+    }
+    vTaskDelay(pdMS_TO_TICKS(1000)); // Check every second, adjust as necessary
+  }
 }
 

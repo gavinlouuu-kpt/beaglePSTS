@@ -9,12 +9,10 @@ String processCommand(const String& receivedCommand);
 void printFileContent();
 void printHexFileContent();
 
-void AppendArrayTest();
-// void listFilesInDirectory();
 void listFilesInDirectory(const String& directoryPath = "/");
 bool deleteAllFilesInLittleFS();
 bool deleteAllFilesInDirectory(const char *dirPath);
-void CLI_Call();
-void CLI_Task(void *pvParameters);
+void i2cScanner();
+void batRead();
 
 #endif // SAVEDATA_H

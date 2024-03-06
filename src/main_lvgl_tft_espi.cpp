@@ -222,7 +222,8 @@ void setup()
   }
 
 
-    Wire.begin(C_SDA, C_SCL);
+    // Wire.begin(C_SDA, C_SCL); // DAT2 is SDA, DAT3 is SCL
+    Wire.begin(C_SCL, C_SDA); // DAT2 is SDA, DAT3 is SCL
     pinSetup();
     pwmSetup();
     configInit();
@@ -264,7 +265,7 @@ void setup()
     // lv_label_set_text( label, "Hello Ardino and LVGL!");
     // lv_obj_align( label, LV_ALIGN_CENTER, 0, 0 );
     
-    CLI_Call();
+    // CLI_Call();
 
     setStyle();
     makeKeyboard();
@@ -276,6 +277,7 @@ void setup()
     tryPreviousNetwork();
     networkCheck();
     buildTuning();
+    // powerTask();
     lv_timer_t * timer = lv_timer_create(check_upload_status, 500, NULL); // 1000 ms interval
     // lv_timer_t * uploadTimer = lv_timer_create(updateUploadState, 500, NULL); 
     // Serial.println( "Setup done" );
@@ -284,5 +286,7 @@ void setup()
 void loop()
 {
     lv_timer_handler(); /* let the GUI do its work */
+    beagleCLI();
+    // batRead();
     delay( 5 );
 }

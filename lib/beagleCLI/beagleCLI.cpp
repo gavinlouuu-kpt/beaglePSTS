@@ -10,8 +10,9 @@
 #include <beagleCLI.h>
 #include <Firebase_ESP_Client.h>
 #include <Network.h>
-
+#include <Wire.h>
 #include <Init.h>
+#include <pinConfig.h>
 
 extern std::map<String, std::function<void()>> commandMap;
 
@@ -96,28 +97,6 @@ void printHexFileContent() {
     file.close();
 }
 
-// void listFilesInDirectory(const String& directoryPath) {
-//     File dir = LittleFS.open(directoryPath);
-//     if (!dir || !dir.isDirectory()) {
-//         Serial.println("Failed to open directory");
-//         return;
-//     }
-
-//     File file = dir.openNextFile();
-//     while (file) {
-//         if (file.isDirectory()) {
-//             Serial.print("DIR : ");
-//             Serial.println(file.name());
-//             // Recursively list nested directories
-//             listFilesInDirectory(file.name());
-//         } else {
-//             Serial.print("FILE: ");
-//             Serial.println(file.name());
-//         }
-//         file = dir.openNextFile();
-//     }
-// }
-
 void listFilesInDirectory(const String& directoryPath) {
     File dir = LittleFS.open(directoryPath);
     if (!dir) {
@@ -200,16 +179,12 @@ void cmdSetup() {
     commandMap["deleteAll"] = []() { deleteAllFilesInLittleFS();};
     commandMap["ls"] = []() { listFilesInDirectory(); };
     commandMap["open"] = []() { printFileContent(); };
-    // commandMap["arraytest"] = []() { addArrayJSON(userID,globalLists); };
-    // commandMap["fireGetSample"] = []() { fireGetSample(); };
-    // commandMap["dataFF"] = []() { dataFF(); };
     commandMap["info"] = []() { ESPinfo(); };
     commandMap["appendmap"] = []() { AppendMapTest(); };
     commandMap["fbota"] = []() { fbOTA(); };
     commandMap["net"] = []() { networkState(); };
-    // commandMap["readP"] = []() { readPumpSpeed("/factory/preset.json"); };
-    // commandMap["localRead"] = []() { localRead(); };
-    // commandMap["dataFactory"] = []() { dataFactoryTest(); }; 
+    commandMap["i2cScanner"] = []() { i2cScanner(); };
+    // commandMap["bat"] = []() { batRead(); };
     commandMap["help"] = [&]() {
     Serial.println("Available commands:");
     for (const auto& command : commandMap) {
@@ -227,18 +202,58 @@ void beagleCLI() {
     }
 }
 
-void CLI_Task(void *pvParameters) {
-    while (true) {
-        beagleCLI();
-        vTaskDelay(pdMS_TO_TICKS(10));
-    }
-}
+// void batRead(){
+//     Serial.print("Battery Voltage w/o enable VBAT: ");
+//     digitalWrite(VBAT, LOW);
+//     delay(5);
+//     Serial.println(analogRead(BAT));
 
-void CLI_Call(){
-    xTaskCreate(CLI_Task,
-              "CLI_Task",
-              16384, //4096
-              NULL,
-              1,
-              NULL);
+//     Serial.print("Battery Voltage enable VBAT: ");
+//     digitalWrite(VBAT, HIGH);
+//     delay(5);
+//     Serial.println(analogRead(BAT));
+    
+// }
+
+void i2cScanner(){
+  byte error, address;
+  int nDevices;
+
+  Serial.println("Scanning...");
+
+  nDevices = 0;
+  for (address = 1; address < 127; address++) {
+    // The i2c_scanner uses the return value of
+    // the Write.endTransmission to see if
+    // a device did acknowledge to the address.
+    Wire.beginTransmission(address);
+    error = Wire.endTransmission();
+
+    if (error == 0) {
+      Serial.print("I2C device found at address 0x");
+      if (address < 16) {
+        Serial.print("0");
+      }
+      Serial.print(address, HEX);
+      Serial.println("  !");
+
+      nDevices++;
+    }
+    else if (error == 4) {
+      Serial.print("Unknown error at address 0x");
+      if (address < 16) {
+        Serial.print("0");
+      }
+      Serial.println(address, HEX);
+    }
+  }
+  if (nDevices == 0) {
+    Serial.println("No I2C devices found\n");
+  }
+  else {
+    Serial.println("done\n");
+  }
+
+  // Wait 5 seconds for the next scan
+  
 }

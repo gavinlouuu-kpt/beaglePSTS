@@ -50,5 +50,8 @@ static void lv_spinbox_decrement_event_cb(lv_event_t * e);
 void lv_example_spinbox_1(void);
 
 static void resetUploadState(lv_timer_t * timer);
+void batRead();
+void powerTask();
+void powerMan(void *pvParameters);
 
 #endif // UI_h
