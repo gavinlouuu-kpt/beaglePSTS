@@ -275,7 +275,7 @@ void wifiCheckTask(void *pvParameters) {
     if (WiFi.status() == WL_CONNECTED) {
     fbKeepAlive();
     } 
-    vTaskDelay(pdMS_TO_TICKS(60000)); // Check every 10 seconds
+    vTaskDelay(pdMS_TO_TICKS(60000)); // Check every 60 seconds
   }
 }
 
