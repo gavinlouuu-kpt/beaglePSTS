@@ -276,11 +276,11 @@ void batRead() {
 
   digitalWrite(VBAT, LOW);
   delay(5);
-  float voltageWithoutEnable = analogRead(BAT)  /* Conversion Factor */;
+  float voltageWithoutEnable = ((analogRead(BAT)*(3.3/4095))/0.175)+0.905  /* 0.905 is offset value from mosfet */;
 
 
   // Format the string to display
-  snprintf(buf, sizeof(buf), "VBAT: %.0f", voltageWithoutEnable);
+  snprintf(buf, sizeof(buf), "BAT: %.2fV", voltageWithoutEnable);
 
   // Update the label text
   lv_label_set_text(batLabel, buf);
