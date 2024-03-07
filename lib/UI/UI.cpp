@@ -360,7 +360,7 @@ void wifiCheckTask(void *pvParameters) {
     if (WiFi.status() == WL_CONNECTED) {
     fbKeepAlive();
     } 
-    vTaskDelay(pdMS_TO_TICKS(60000)); // Check every 60 seconds
+    vTaskDelay(pdMS_TO_TICKS(30000)); // Check every 60 seconds
   }
 }
 
@@ -378,6 +378,7 @@ void timerForNetwork(lv_timer_t *timer) {
       popupMsgBox("WiFi Connected!", "Now you'll get the current time soon.");
       networkStatus = NETWORK_CONNECTED;
       configTime(gmtOffset_sec, daylightOffset_sec, "hk.pool.ntp.org","asia.pool.ntp.org","time.nist.gov");
+      firebaseSetup();
       break;
 
     case NETWORK_CONNECTED:
@@ -736,7 +737,7 @@ void networkScanner() {
 void networkConnector() {
   xTaskCreate(beginWIFITask,
               "beginWIFITask",
-              8192, //original 2048
+              10240, //original 2048
               NULL,
               1,
               &ntConnectTaskHandler);
@@ -775,7 +776,7 @@ void beginWIFITask(void *pvParameters) {
     networkStatus = NETWORK_CONNECTED_POPUP;
     saveWIFICredentialEEPROM(1, ssidName + " " + ssidPW);
     saveWIFICredentialsToLittleFS(ssidName.c_str(), ssidPW.c_str());
-    firebaseSetup();
+    // vTaskDelay(250);
   } else {
     networkStatus = NETWORK_CONNECT_FAILED;
     saveWIFICredentialEEPROM(0, "");

@@ -4,7 +4,8 @@
 
 #include <Arduino.h>
 #include <lvgl.h>
-// #include <credential.h>
+#include <FirebaseJson.h>
+
 
 extern volatile bool uploadInProgress;
 extern volatile bool busy;
@@ -17,7 +18,9 @@ enum UploadState {
 void updateUploadState(lv_timer_t *timer);
 // void checkFile(char userID[]);
 // void fsInit();
-// void addDataJSON(char userID[], FirebaseJsonArray& nestedData);
+void localSave(String localPath, FirebaseJson sample);
+void ensureDirectoriesExist(const String& path);
+// void addDataJSON(FirebaseJsonArray& nestedData);
 // void addArrayJSON(char userID[], const std::vector<std::vector<int>>& lists);
 // void vectorDebug();
 void firebaseSetup();

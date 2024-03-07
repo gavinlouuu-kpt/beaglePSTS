@@ -56,42 +56,70 @@
 //     }
 // }
 
-// void fsInit() {
-//     const char* macAddress = WiFi.macAddress().c_str(); // Example MAC address
-//     char filePath[64];
-//     snprintf(filePath, sizeof(filePath), "/%s.json", macAddress);
-//     Serial.println("filePath:");
-//     Serial.println(filePath);
-//     if (!LittleFS.exists(filePath)) {
-//         Serial.println("Creating new file...");
+// #include <LittleFS.h>
 
-//         FirebaseJson json;
-//         char jsonKey[64];
-//         const char* macAddressKey = WiFi.macAddress().c_str();
-//         json.set(macAddressKey); //json.set(jsonKey,"") setting an empty string for demonstration
+// Utility function to ensure all directories in the path exist
+void ensureDirectoriesExist(const String& path) {
+    String dirPath = "/";
+    for (int i = 1; i < path.length(); i++) {
+        if (path[i] == '/') {
+            // Only attempt to create the directory if it doesn't already exist
+            if (!LittleFS.exists(dirPath)) {
+                if (!LittleFS.mkdir(dirPath)) {
+                    Serial.println("Failed to create directory: " + dirPath);
+                    return;
+                }
+            }
+        }
+        dirPath += path[i];
+    }
 
-//         // Serialize JSON to std::string for writing
-//         std::string jsonData;
-//         json.toString(jsonData, true); // 'false' for compact serialization
+    // Create the final directory if it doesn't already exist
+    if (!LittleFS.exists(dirPath)) {
+        if (!LittleFS.mkdir(dirPath)) {
+            Serial.println("Failed to create directory: " + dirPath);
+            return;
+        }
+    }
+}
 
-//         // Write to file
-//         File file = LittleFS.open(filePath, "w");
-//         if (!file) {
-//             Serial.println("Failed to open file for writing");
-//             return;
-//         }
-//         file.print(jsonData.c_str());
-//         file.close();
-
-//         Serial.println("File created successfully.");
-//     } else {
-//         Serial.println("File already exists.");
-//     }
-// }
+void localSave(String localPath, FirebaseJson sample) {
+    // Ensure the path starts with a forward slash
+    String fullPath = localPath.startsWith("/") ? localPath : "/" + localPath;
+    Serial.print("fullPath:");
+    Serial.println(fullPath);
+    int lastSlashIndex = fullPath.lastIndexOf('/');
+    String dirPath = fullPath.substring(0, lastSlashIndex);
+    Serial.print("dirPath:");
+    Serial.println(dirPath);
 
 
+    // Ensure all directories in the path exist
+    ensureDirectoriesExist(dirPath);
 
-// void addDataJSON(char userID[], FirebaseJsonArray& nestedData) {
+    Serial.println("Proceed to writing...");
+
+    // Serialize sample JSON to String for writing
+    String localData;
+    sample.toString(localData, true); // 'false' for compact serialization
+
+    // Write to file
+    File file = LittleFS.open(fullPath, "w");
+    Serial.println("littleFS opens:");
+    Serial.println(fullPath);
+    if (!file) {
+        Serial.println("Failed to open file for writing");
+        return;
+    }
+    file.print(localData);
+    file.close();
+    Serial.println("File created successfully.");
+}
+
+
+
+
+// void addDataJSON(FirebaseJsonArray& nestedData) {
 //     String macAddress = WiFi.macAddress();
 //     String filePath = "/" + macAddress + ".json";  // Concatenate the MAC address with the file path
 
@@ -126,7 +154,7 @@
 
 //     // Check if today's date exists
 //     FirebaseJsonData jsonData;
-//     String path = String(macAddress) + "/" + userID + "/" + today;
+//     String path = String(macAddress) + "/" + today;
 //     if (!json.get(jsonData, path.c_str())) {
 //         // Today's date does not exist, create it
 //         FirebaseJson emptyJson;
@@ -570,6 +598,14 @@ void dataFF(void *pvParameters){
     std::string updateMask = std::string("t") + currentTime; // This is "fields/<currentTime>"
     update_write.update_masks = updateMask;
     update_write.update_document_path = documentPath.c_str();
+
+    std::string localPath = documentPath + "/t" + currentTime;
+    // std::string todayStr(today); // Convert C-style string to std::string
+    // std::string currentTimeStr(currentTime); // Convert C-style string to std::string
+
+    // std::string localPath = todayStr + "/" + currentTimeStr;
+    localSave(localPath.c_str(), content);
+            // Add a write object to a write array.
 
     writes.push_back(update_write);
 
