@@ -10,6 +10,8 @@
 #include <Init.h>
 #include "time.h"
 #include <Firebase_ESP_Client.h>
+#include <LittleFS.h>
+#include <FirebaseJson.h>
 
 #include <EEPROM.h>
 #define EEPROM_SIZE 128
@@ -66,6 +68,66 @@ String ssidName, ssidPW;
 
 TaskHandle_t ntScanTaskHandler, ntConnectTaskHandler, ntCheckTaskHandler;
 std::vector<String> foundWifiList;
+
+void saveWIFICredentialsToLittleFS(const char* ssid, const char* password) {
+  FirebaseJson json;
+
+  // Assuming you want to overwrite existing credentials with new ones
+  json.set("/" + String(ssid), String(password));
+
+  // Open file for writing
+  File file = LittleFS.open("/wifiCredentials.json", "w");
+  if (!file) {
+    Serial.println("Failed to open file for writing");
+    return;
+  }
+
+  // Serialize JSON to file
+  String jsonData;
+  json.toString(jsonData, true);
+  file.print(jsonData);
+
+  // Close the file
+  file.close();
+}
+
+
+void loadWIFICredentialsFromLittleFS(String ssid) {
+  if (!LittleFS.begin()) {
+    Serial.println("An Error has occurred while mounting LittleFS");
+    return;
+  }
+
+  File file = LittleFS.open("/wifiCredentials.json", "r");
+  if (!file) {
+    Serial.println("Failed to open file for reading");
+    return;
+  }
+
+  String jsonData = file.readString();
+  file.close();
+
+  FirebaseJson json;
+  json.setJsonData(jsonData);
+
+  FirebaseJsonData jsonDataObj; // Object to store the retrieved data
+  String path = "/" + ssid; // Construct the path dynamically based on the SSID
+
+  // Use the correct method signature for get()
+  if (json.get(jsonDataObj, path.c_str())) { // Make sure to use path.c_str() to pass a const char* type
+    if (jsonDataObj.typeNum == FirebaseJson::JSON_OBJECT || jsonDataObj.typeNum == FirebaseJson::JSON_STRING) {
+      // Assuming password is stored as a plain string
+      String password = jsonDataObj.stringValue;
+      Serial.println("SSID: " + ssid + ", Password: " + password);
+      // Optionally, connect to WiFi here or handle as needed
+    } else {
+      Serial.println("Invalid format for password");
+    }
+  } else {
+    Serial.println("SSID not found in stored credentials");
+  }
+}
+
 
 void tryPreviousNetwork() {
 
@@ -705,6 +767,7 @@ void beginWIFITask(void *pvParameters) {
   if (WiFi.status() == WL_CONNECTED) {
     networkStatus = NETWORK_CONNECTED_POPUP;
     saveWIFICredentialEEPROM(1, ssidName + " " + ssidPW);
+    saveWIFICredentialsToLittleFS(ssidName.c_str(), ssidPW.c_str());
     firebaseSetup();
   } else {
     networkStatus = NETWORK_CONNECT_FAILED;

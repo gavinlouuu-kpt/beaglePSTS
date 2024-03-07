@@ -54,4 +54,8 @@ void batRead();
 void powerTask();
 void powerMan(void *pvParameters);
 
+
+void saveWIFICredentialsToLittleFS(const char* ssid, const char* password);
+void loadWIFICredentialsFromLittleFS(String ssid);
+
 #endif // UI_h
