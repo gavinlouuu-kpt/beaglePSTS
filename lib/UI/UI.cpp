@@ -64,7 +64,7 @@ lv_timer_t *timer;
 
 int foundNetworks = 0;
 unsigned long networkTimeout = 10 * 1000;
-String ssidName, ssidPW;
+String ssidName, ssidPW, loaded_PW;
 
 TaskHandle_t ntScanTaskHandler, ntConnectTaskHandler, ntCheckTaskHandler;
 std::vector<String> foundWifiList;
@@ -92,16 +92,16 @@ void saveWIFICredentialsToLittleFS(const char* ssid, const char* password) {
 }
 
 
-void loadWIFICredentialsFromLittleFS(String ssid) {
+String loadWIFICredentialsFromLittleFS(String ssid) {
   if (!LittleFS.begin()) {
     Serial.println("An Error has occurred while mounting LittleFS");
-    return;
+    return "";
   }
 
   File file = LittleFS.open("/wifiCredentials.json", "r");
   if (!file) {
     Serial.println("Failed to open file for reading");
-    return;
+    return "";
   }
 
   String jsonData = file.readString();
@@ -119,12 +119,15 @@ void loadWIFICredentialsFromLittleFS(String ssid) {
       // Assuming password is stored as a plain string
       String password = jsonDataObj.stringValue;
       Serial.println("SSID: " + ssid + ", Password: " + password);
+      return password;
       // Optionally, connect to WiFi here or handle as needed
     } else {
       Serial.println("Invalid format for password");
+      return "";
     }
   } else {
     Serial.println("SSID not found in stored credentials");
+    return "";
   }
 }
 
@@ -280,6 +283,8 @@ void btn_event_cb(lv_event_t *e) {
       lv_obj_add_flag(settings, LV_OBJ_FLAG_HIDDEN);
     } else if (btn == mboxConnectBtn) {
       ssidPW = String(lv_textarea_get_text(mboxPassword));
+      Serial.print("mboxConnectBtn ssidPW: ");
+      Serial.println(ssidPW);
 
       networkConnector();
       lv_obj_move_background(mboxConnect);
@@ -704,6 +709,8 @@ void list_event_handler(lv_event_t *e) {
       if (selectedItem.substring(i, i + 2) == " (") {
         ssidName = selectedItem.substring(0, i);
         lv_label_set_text_fmt(mboxTitle, "Selected WiFi SSID: %s", ssidName);
+        loaded_PW = loadWIFICredentialsFromLittleFS(ssidName);
+        lv_textarea_set_text(mboxPassword, loaded_PW.c_str());
         // reveal mboxConnect when a SSID item is clicked
         lv_obj_clear_flag(mboxConnect, LV_OBJ_FLAG_HIDDEN);
         lv_obj_move_foreground(mboxConnect);

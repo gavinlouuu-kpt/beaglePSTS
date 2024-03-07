@@ -277,7 +277,7 @@ void setup()
     tryPreviousNetwork();
     networkCheck();
     buildTuning();
-    powerTask();
+    // powerTask();
     lv_timer_t * timer = lv_timer_create(check_upload_status, 500, NULL); // 1000 ms interval
     // lv_timer_t * uploadTimer = lv_timer_create(updateUploadState, 500, NULL); 
     // Serial.println( "Setup done" );
@@ -290,3 +290,4 @@ void loop()
     // batRead();
     delay( 5 );
 }
+//ls open
