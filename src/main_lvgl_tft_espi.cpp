@@ -222,8 +222,8 @@ void setup()
   }
 
 
-    // Wire.begin(C_SDA, C_SCL); // DAT2 is SDA, DAT3 is SCL
-    Wire.begin(C_SCL, C_SDA); // DAT2 is SDA, DAT3 is SCL
+    Wire.begin(C_SDA, C_SCL); // DAT2 is SDA, DAT3 is SCL
+    // Wire.begin(C_SCL, C_SDA); // DAT2 is SDA, DAT3 is SCL
     pinSetup();
     pwmSetup();
     configInit();

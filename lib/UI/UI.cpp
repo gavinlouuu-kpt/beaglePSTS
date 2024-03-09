@@ -7,6 +7,9 @@
 #include "TFT_eSPI.h"
 #include "saveData.h"
 #include "SensorDataFactory.h"
+#include "SensorData.h"
+#include "Adafruit_Sensor.h"
+#include "Adafruit_BME680.h"
 #include <Init.h>
 #include "time.h"
 #include <Firebase_ESP_Client.h>

@@ -535,12 +535,16 @@ void dataFF(void *pvParameters){
 
 
             // info is the collection id, countries is the document id in collection info.
+            // updated path 2024/3/9 GROUP/MAC/DATE/TIME/ GROUP should be read from JSON but now it is hardcoded
+            // TIME becomes a document, repeat time again for the fields for distinctive and dynamic fields
     std::string documentPath = macAddressTest + "/" + today;
+    std::string RESTdocuPath = "DELIA_MEIFOO/"+ documentPath + "/t" + currentTime;
 
             // Here's the critical part: specify the new field in the updateMask
     std::string updateMask = std::string("t") + currentTime; // This is "fields/<currentTime>"
     update_write.update_masks = updateMask;
-    update_write.update_document_path = documentPath.c_str();
+    // update_write.update_document_path = documentPath.c_str();
+    update_write.update_document_path = RESTdocuPath.c_str();
 
     std::string localPath = documentPath + "/t" + currentTime;
     localSave(localPath.c_str(), content);
