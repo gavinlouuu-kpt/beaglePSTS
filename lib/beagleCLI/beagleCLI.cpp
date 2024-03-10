@@ -181,6 +181,7 @@ void cmdSetup() {
     commandMap["open"] = []() { printFileContent(); };
     commandMap["info"] = []() { ESPinfo(); };
     commandMap["appendmap"] = []() { AppendMapTest(); };
+    commandMap["create"] = []() { CreateTest(); };
     commandMap["fbota"] = []() { fbOTA(); };
     commandMap["net"] = []() { networkState(); };
     commandMap["i2cScanner"] = []() { i2cScanner(); };

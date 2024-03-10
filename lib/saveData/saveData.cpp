@@ -538,7 +538,7 @@ void dataFF(void *pvParameters){
             // updated path 2024/3/9 GROUP/MAC/DATE/TIME/ GROUP should be read from JSON but now it is hardcoded
             // TIME becomes a document, repeat time again for the fields for distinctive and dynamic fields
     std::string documentPath = macAddressTest + "/" + today;
-    std::string RESTdocuPath = "DELIA_MEIFOO/"+ documentPath + "/t" + currentTime;
+    std::string RESTdocuPath = TARGET_GROUP + "/" + documentPath + "/t" + currentTime;
 
             // Here's the critical part: specify the new field in the updateMask
     std::string updateMask = std::string("t") + currentTime; // This is "fields/<currentTime>"
@@ -583,6 +583,45 @@ void dataFF(void *pvParameters){
         // Consider a fallback or notification mechanism
     }
 
+    if (FIREBASE_PATH == 0){
+        // The dyamic array of write object firebase_firestore_document_write_t.
+        std::vector<struct firebase_firestore_document_write_t> writes_init;
+        // A write object that will be written to the document.
+        struct firebase_firestore_document_write_t update_write_init;
+        update_write_init.type = firebase_firestore_document_write_type_update;
+        // Set the document content to write (transform)
+
+        FirebaseJson pathInit;
+        std::string path_to_init = TARGET_GROUP + "/" + macAddressTest;
+        std::string initKey = "fields/" + std::string(today) + "/stringValue/";
+        pathInit.set(initKey, USER_ID);
+
+        update_write_init.update_document_content = pathInit.raw();
+
+        std::string initMask = today; // double check: it should be masking the field not document
+        update_write_init.update_masks = initMask;
+        update_write_init.update_document_path = path_to_init.c_str();
+
+        writes_init.push_back(update_write_init);
+        int init_attempts = 0;
+        const int max_init_Attempts = 3; // Maximum number of retry attempts
+        bool init_success = false;
+
+        while (!init_success && init_attempts < max_init_Attempts) {
+        if (Firebase.Firestore.commitDocument(&fbdo, FIREBASE_PROJECT_ID, "", writes_init, "")) {
+            Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+            // uploadState = Success;
+            init_success = true;
+        } else {
+            Serial.println(fbdo.errorReason());
+            // uploadState = Failure;
+            attempts++;
+            delay(1000); // Wait for 1 second before retrying
+        }
+    }
+
+    } 
+
     updateUploadState(NULL);
         
             // if (Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, documentPath.c_str(), content.raw(), updateMask /* updateMask */))
@@ -600,7 +639,27 @@ void dataFF(void *pvParameters){
 }
 
 
+void CreateTest(){
 
+
+        // For the usage of FirebaseJson, see examples/FirebaseJson/BasicUsage/Create_Edit_Parse/Create_Edit_Parse.ino
+        FirebaseJson content;
+
+        String documentPath = "test_collection/test_document" + String(count);
+
+        content.set("fields/myLatLng/geoPointValue/longitude", 23.678198);
+
+        count++;
+
+        Serial.print("Create a document... ");
+
+        if (Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, documentPath.c_str(), content.raw()))
+            Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+        else
+            Serial.println(fbdo.errorReason());
+    
+    
+}
 
 void AppendMapTest()
 {
@@ -613,7 +672,8 @@ void AppendMapTest()
         update_write.type = firebase_firestore_document_write_type_update;
         // Set the document content to write (transform)
         FirebaseJson content;
-        String documentPath = "test_collection/test_document";
+        String preDocPath = "test_collection/test_document";
+        String documentPath = "test_collection/test_document/sub_collection/sub_document";
         content.set("fields/myMap"+ String(count) +"/mapValue/fields/key" + String(count) + "/stringValue", "value" + String(count));
         // Set the update document content
         update_write.update_document_content = content.raw();
@@ -632,3 +692,4 @@ void AppendMapTest()
             Serial.println(fbdo.errorReason());
     
 }
+

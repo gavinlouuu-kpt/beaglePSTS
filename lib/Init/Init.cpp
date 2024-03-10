@@ -15,6 +15,9 @@ String API_KEY;
 String STORAGE_BUCKET_ID;
 long gmtOffset_sec;
 int daylightOffset_sec;
+int FIREBASE_PATH;
+String TARGET_GROUP;
+String USER_ID;
 
 
 // // LittleFS system
@@ -67,10 +70,65 @@ String readConfigValue(const char *path, const char *jsonPath) {
   return jsonData.stringValue;
 }
 
+void configIntMod(std::string& path, int value) {
+  // Initialize LittleFS
+  if (!LittleFS.begin()) {
+    Serial.println("An Error has occurred while mounting LittleFS");
+    return;
+  }
+  
+  // Open the config.json file for reading
+  File configFile = LittleFS.open("/config.json", "r");
+  if (!configFile) {
+    Serial.println("Failed to open config.json for reading");
+    return;
+  }
 
+  // Read the file into a String
+  String configContent;
+  while (configFile.available()) {
+    configContent += char(configFile.read());
+  }
+  configFile.close(); // Close the file after reading
+
+  // Parse the JSON content
+  FirebaseJson json;
+  json.setJsonData(configContent.c_str());
+
+  // Check and modify the target
+  FirebaseJsonData jsonData;
+  if (json.get(jsonData, path.c_str())) {
+    // Target exists, modify its value
+    json.set(path.c_str(), value);
+
+    // Serialize the modified JSON object
+    String modifiedConfig;
+    json.toString(modifiedConfig, true);
+
+    // Open the config.json file for writing
+    File configFile = LittleFS.open("/config.json", "w");
+    if (!configFile) {
+      Serial.println("Failed to open config.json for writing");
+      return;
+    }
+
+    // Write the modified configuration back to the file
+    configFile.print(modifiedConfig);
+    configFile.close(); // Close the file after writing
+    Serial.println("Configuration updated successfully.");
+  } else {
+    Serial.println("Target path does not exist in the configuration.");
+  }
+
+  // Cleanup LittleFS
+  LittleFS.end();
+}
 
 void configInit(){
   ledcWrite(PumpPWM, 0); // turn off pump
+  USER_ID = readConfigValue("/config.json", "/USER_ID");
+  TARGET_GROUP = readConfigValue("/config.json", "/TARGET_GROUP");
+  FIREBASE_PATH = readConfigValue("/config.json", "/FIREBASE_PATH").toInt();
   pumpSpeed = readConfigValue("/config.json","/pump_speed").toInt();
   FIREBASE_PROJECT_ID = readConfigValue("/config.json", "/FIREBASE_PROJECT_ID");
   STORAGE_BUCKET_ID = readConfigValue("/config.json", "/STORAGE_BUCKET_ID");

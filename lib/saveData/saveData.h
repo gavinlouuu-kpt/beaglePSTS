@@ -33,6 +33,7 @@ void firestoreUpload();
 void fbKeepAlive();
 
 void AppendMapTest();
+void CreateTest();
 void fbOTA();
 // void dataFactoryTest();
 // void fsCall();
