@@ -30,9 +30,12 @@ void text_input_event_cb(lv_event_t *e);
 void makeKeyboard();
 void popupMsgBox(String title, String msg);
 void toggle_visibility(lv_obj_t* obj, bool condition);
-
+void safeLvLabelSetText(lv_obj_t* label, const char* text);
 void networkCheck();
 void wifiCheckTask(void *pvParameters);
+void createPumpSwitch();
+void createSubmitButton();
+void submit_btn_event_cb(lv_event_t * e);
 
 void check_upload_status(lv_timer_t *timer);
 void updateLocalTime();

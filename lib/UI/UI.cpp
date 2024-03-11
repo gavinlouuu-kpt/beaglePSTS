@@ -15,6 +15,7 @@
 #include <Firebase_ESP_Client.h>
 #include <LittleFS.h>
 #include <FirebaseJson.h>
+#include <stdarg.h>
 
 #include <EEPROM.h>
 #define EEPROM_SIZE 128
@@ -34,6 +35,7 @@ lv_obj_t *spinbox;
 
 lv_style_t border_style;
 lv_style_t popupBox_style;
+lv_obj_t * submitBtn;
 lv_obj_t *batLabel;
 lv_obj_t *timeLabel;
 lv_obj_t *device_mac;
@@ -52,6 +54,7 @@ lv_obj_t *spinner_save;
 lv_obj_t *settingCloseBtn;
 lv_obj_t *tuningCloseBtn;
 lv_obj_t *settingWiFiSwitch;
+lv_obj_t *PumpSwitch;
 lv_obj_t *wfList;
 lv_obj_t *settinglabel;
 lv_obj_t *tuninglabel;
@@ -71,6 +74,37 @@ String ssidName, ssidPW, loaded_PW;
 
 TaskHandle_t ntScanTaskHandler, ntConnectTaskHandler, ntCheckTaskHandler;
 std::vector<String> foundWifiList;
+
+void safeLvLabelSetText(lv_obj_t* label, const char* text) {
+    if (label == NULL) {
+        Serial.println("Warning: label is NULL in safeLvLabelSetText");
+        return;
+    }
+
+    if (text != NULL) {
+        lv_label_set_text(label, text);
+    } else {
+        Serial.println("Warning: Attempted to set NULL string on label");
+    }
+}
+
+void safeLvLabelSetTextFmt(lv_obj_t* label, const char* format, ...) {
+    if (label == NULL) {
+        Serial.println("Warning: label is NULL in safeLvLabelSetTextFmt");
+        return;
+    }
+
+    if (format != NULL) {
+        char buf[256]; // Define the size according to your needs
+        va_list args;
+        va_start(args, format);
+        vsnprintf(buf, sizeof(buf), format, args);
+        va_end(args);
+        lv_label_set_text(label, buf);
+    } else {
+        Serial.println("Warning: Attempted to set NULL format string on label");
+    }
+}
 
 void saveWIFICredentialsToLittleFS(const char* ssid, const char* password) {
   FirebaseJson json;
@@ -490,7 +524,8 @@ void buildBody() {
   // result display
   device_mac = lv_label_create(bodyScreen);
   // lv_obj_add_event_cb(spinner_save, db_btn_event_cb, LV_EVENT_ALL, NULL);
-  lv_label_set_text(device_mac, WiFi.macAddress().c_str());  /*Set the labels text*/
+  safeLvLabelSetText(device_mac, WiFi.macAddress().c_str());  /*Set the labels text*/
+  // lv_label_set_text(device_mac, WiFi.macAddress().c_str());  /*Set the labels text*/
   lv_obj_set_size(device_mac, 140, 30);
   lv_obj_align(device_mac, LV_ALIGN_BOTTOM_LEFT, -10, 30);
   // lv_obj_add_flag(device_mac, LV_OBJ_FLAG_HIDDEN);
@@ -643,21 +678,18 @@ void buildTuning() {
 
   tuningCloseBtn = lv_btn_create(tuning);
   lv_obj_set_size(tuningCloseBtn, 30, 30);
-  lv_obj_align(tuningCloseBtn, LV_ALIGN_TOP_RIGHT, 0, -10);
+  lv_obj_align(tuningCloseBtn, LV_ALIGN_TOP_RIGHT, 0, 0);
   lv_obj_add_event_cb(tuningCloseBtn, tuning_btn_event_cb, LV_EVENT_ALL, NULL);
   lv_obj_t *btnSymbol = lv_label_create(tuningCloseBtn);
   lv_label_set_text(btnSymbol, LV_SYMBOL_CLOSE);
   lv_obj_center(btnSymbol);
 
-  // settingWiFiSwitch = lv_switch_create(tuning);
-  // lv_obj_add_event_cb(settingWiFiSwitch, btn_event_cb, LV_EVENT_ALL, NULL);
-  // lv_obj_align_to(settingWiFiSwitch, tuninglabel, LV_ALIGN_TOP_RIGHT, 60, -10);
-  // lv_obj_add_flag(tuning, LV_OBJ_FLAG_HIDDEN);
+  createSubmitButton();
+  createPumpSwitch();
 
-  // wfList = lv_list_create(tuning);
-  // lv_obj_set_size(wfList, tft.width() - 140, 210);
-  // lv_obj_align_to(wfList, tuninglabel, LV_ALIGN_TOP_LEFT, 0, 30);
   lv_example_spinbox_1();
+  
+
 }
 
 static void lv_spinbox_increment_event_cb(lv_event_t * e)
@@ -699,7 +731,55 @@ void lv_example_spinbox_1(void)
     lv_obj_align_to(btn, spinbox, LV_ALIGN_OUT_LEFT_MID, -5, 0);
     lv_obj_set_style_bg_img_src(btn, LV_SYMBOL_MINUS, 0);
     lv_obj_add_event_cb(btn, lv_spinbox_decrement_event_cb, LV_EVENT_ALL, NULL);
+
+
 }
+
+void submit_btn_event_cb(lv_event_t * e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *btn = lv_event_get_target(e);
+    if(code == LV_EVENT_CLICKED) {
+      if (btn == submitBtn){
+        int pumpSpeed = lv_spinbox_get_value(spinbox);
+        configIntMod("/pump_speed", pumpSpeed);
+        pumpSpeed = readConfigValue("/config.json","/pump_speed").toInt();
+      }
+    }
+}
+
+void pump_test_event_cb(lv_event_t * e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *btn = lv_event_get_target(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+      if (btn == PumpSwitch){
+        if (lv_obj_has_state(btn, LV_STATE_CHECKED)){
+          digitalWrite(PumpPWM, pumpSpeed);
+        } else {
+          digitalWrite(PumpPWM, 0);
+        }
+      }
+    }
+}
+
+void createPumpSwitch() {
+  PumpSwitch = lv_switch_create(tuning);
+  lv_obj_add_event_cb(PumpSwitch, pump_test_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+  lv_obj_align_to(PumpSwitch, spinbox, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+  // lv_obj_add_flag(PumpSwitch, LV_OBJ_FLAG_HIDDEN);
+}
+
+void createSubmitButton() {
+    submitBtn = lv_btn_create(tuning);
+    lv_obj_align(submitBtn, LV_ALIGN_CENTER, 0, 50);
+    lv_obj_set_size(submitBtn, 100, 30); // Set size as needed
+    lv_obj_add_event_cb(submitBtn, submit_btn_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_t * label = lv_label_create(submitBtn);
+    lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
+    lv_label_set_text(label, "Submit");
+}
+
+
+
 
 void list_event_handler(lv_event_t *e) {
   lv_event_code_t code = lv_event_get_code(e);
@@ -712,7 +792,8 @@ void list_event_handler(lv_event_t *e) {
     for (int i = 0; i < selectedItem.length() - 1; i++) {
       if (selectedItem.substring(i, i + 2) == " (") {
         ssidName = selectedItem.substring(0, i);
-        lv_label_set_text_fmt(mboxTitle, "Selected WiFi SSID: %s", ssidName);
+        // lv_label_set_text_fmt(mboxTitle, "Selected WiFi SSID: %s", ssidName);
+        safeLvLabelSetTextFmt(mboxTitle, "Selected WiFi SSID: %s", ssidName.c_str());
         loaded_PW = loadWIFICredentialsFromLittleFS(ssidName);
         lv_textarea_set_text(mboxPassword, loaded_PW.c_str());
         // reveal mboxConnect when a SSID item is clicked
@@ -723,6 +804,7 @@ void list_event_handler(lv_event_t *e) {
     }
   }
 }
+
 
 /*
  * NETWORK TASKS
