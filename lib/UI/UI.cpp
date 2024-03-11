@@ -753,9 +753,9 @@ void pump_test_event_cb(lv_event_t * e) {
     if(code == LV_EVENT_VALUE_CHANGED) {
       if (btn == PumpSwitch){
         if (lv_obj_has_state(btn, LV_STATE_CHECKED)){
-          digitalWrite(PumpPWM, pumpSpeed);
+          ledcWrite(PumpPWM, pumpSpeed);
         } else {
-          digitalWrite(PumpPWM, 0);
+          ledcWrite(PumpPWM, 0);
         }
       }
     }
