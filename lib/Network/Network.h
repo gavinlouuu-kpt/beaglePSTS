@@ -5,6 +5,7 @@
 #include <WiFi.h>
 //state management
 void networkState();
+void GoogleDNS();
 class WiFiManager {
 public:
   WiFiManager();

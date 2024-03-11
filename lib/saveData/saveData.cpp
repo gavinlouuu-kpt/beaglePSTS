@@ -507,7 +507,7 @@ void dataFF(void *pvParameters){
     }
 
     char today[11]; // Buffer to hold the date string
-    strftime(today, sizeof(today), "%Y-%m-%d", &timeinfo); // Format: YYYY-MM-DD
+    strftime(today, sizeof(today), "%Y_%m_%d", &timeinfo); // Format: YYYY-MM-DD
 
     char currentTime[9]; // Buffer to hold the time string
     strftime(currentTime, sizeof(currentTime), "%H_%M_%S", &timeinfo); // Format: HH:MM:SS
@@ -538,7 +538,7 @@ void dataFF(void *pvParameters){
             // updated path 2024/3/9 GROUP/MAC/DATE/TIME/ GROUP should be read from JSON but now it is hardcoded
             // TIME becomes a document, repeat time again for the fields for distinctive and dynamic fields
     std::string documentPath = macAddressTest + "/" + today;
-    std::string RESTdocuPath = TARGET_GROUP + "/" + documentPath + "/t" + currentTime;
+    std::string RESTdocuPath = std::string(TARGET_GROUP.c_str()) + "/" + documentPath + "/t" + currentTime;
 
             // Here's the critical part: specify the new field in the updateMask
     std::string updateMask = std::string("t") + currentTime; // This is "fields/<currentTime>"
@@ -574,7 +574,7 @@ void dataFF(void *pvParameters){
             Serial.println(fbdo.errorReason());
             uploadState = Failure;
             attempts++;
-            delay(1000); // Wait for 1 second before retrying
+            delay(5000); // Wait for 1 second before retrying
         }
     }
 
@@ -584,6 +584,7 @@ void dataFF(void *pvParameters){
     }
 
     if (FIREBASE_PATH == 0){
+        
         // The dyamic array of write object firebase_firestore_document_write_t.
         std::vector<struct firebase_firestore_document_write_t> writes_init;
         // A write object that will be written to the document.
@@ -592,13 +593,13 @@ void dataFF(void *pvParameters){
         // Set the document content to write (transform)
 
         FirebaseJson pathInit;
-        std::string path_to_init = TARGET_GROUP + "/" + macAddressTest;
-        std::string initKey = "fields/" + std::string(today) + "/stringValue/";
+        std::string path_to_init = std::string(TARGET_GROUP.c_str()) + "/" + macAddressTest;
+        std::string initKey = "fields/reset_" + std::string(today) + "/stringValue/";
         pathInit.set(initKey, USER_ID);
 
         update_write_init.update_document_content = pathInit.raw();
 
-        std::string initMask = today; // double check: it should be masking the field not document
+        std::string initMask = "reset_" + std::string(today); // double check: it should be masking the field not document
         update_write_init.update_masks = initMask;
         update_write_init.update_document_path = path_to_init.c_str();
 
@@ -612,6 +613,8 @@ void dataFF(void *pvParameters){
             Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
             // uploadState = Success;
             init_success = true;
+            configIntMod("/FIREBASE_PATH", 1);
+
         } else {
             Serial.println(fbdo.errorReason());
             // uploadState = Failure;

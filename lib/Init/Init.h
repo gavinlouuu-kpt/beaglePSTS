@@ -5,7 +5,7 @@
 
 String readConfigValue(const char *path, const char *jsonPath);
 void configInit();
-void configIntMod(std::string& path, int value);
+void configIntMod(const char *path, int value);
 void writeFile(const char *path, const char *message);
 
 extern String TARGET_GROUP;

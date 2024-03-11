@@ -70,7 +70,7 @@ String readConfigValue(const char *path, const char *jsonPath) {
   return jsonData.stringValue;
 }
 
-void configIntMod(std::string& path, int value) {
+void configIntMod(const char *path, int value) {
   // Initialize LittleFS
   if (!LittleFS.begin()) {
     Serial.println("An Error has occurred while mounting LittleFS");
@@ -97,9 +97,9 @@ void configIntMod(std::string& path, int value) {
 
   // Check and modify the target
   FirebaseJsonData jsonData;
-  if (json.get(jsonData, path.c_str())) {
+  if (json.get(jsonData, path)) {
     // Target exists, modify its value
-    json.set(path.c_str(), value);
+    json.set(path, value);
 
     // Serialize the modified JSON object
     String modifiedConfig;
@@ -120,8 +120,8 @@ void configIntMod(std::string& path, int value) {
     Serial.println("Target path does not exist in the configuration.");
   }
 
-  // Cleanup LittleFS
-  LittleFS.end();
+  // Cleanup LittleFS but it closes the FS entirely needs to be implemented system wide
+  // LittleFS.end();
 }
 
 void configInit(){

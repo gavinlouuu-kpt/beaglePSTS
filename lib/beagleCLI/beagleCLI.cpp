@@ -184,6 +184,7 @@ void cmdSetup() {
     commandMap["create"] = []() { CreateTest(); };
     commandMap["fbota"] = []() { fbOTA(); };
     commandMap["net"] = []() { networkState(); };
+    commandMap["dns"] = []() { GoogleDNS(); };
     commandMap["i2cScanner"] = []() { i2cScanner(); };
     // commandMap["bat"] = []() { batRead(); };
     commandMap["help"] = [&]() {

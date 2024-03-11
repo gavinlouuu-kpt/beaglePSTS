@@ -184,11 +184,27 @@ bool WiFiManager::connectToWiFi(const String& ssid, const String& password) {
 }
 
 void networkState(){
+    char* hostname = "www.google.com";
+    IPAddress resolvedIP;
+    
     if (WiFi.status() != WL_CONNECTED) {
       Serial.println("WiFi connection lost.");
     } 
     else {
-      Serial.println("WiFi connected.");
+    Serial.println("WiFi connected.");
+        if(WiFi.hostByName(hostname, resolvedIP)) {
+            Serial.print("IP Address for ");
+            Serial.print(hostname);
+            Serial.print(" is: ");
+            Serial.println(resolvedIP);
+        } 
+        else {
+            Serial.print("DNS Failed for ");
+            Serial.println(hostname);
+        }
     }
 }
 
+void GoogleDNS(){
+    WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, IPAddress(8,8,8,8));
+}
