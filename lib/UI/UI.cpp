@@ -740,8 +740,8 @@ void submit_btn_event_cb(lv_event_t * e) {
     lv_obj_t *btn = lv_event_get_target(e);
     if(code == LV_EVENT_CLICKED) {
       if (btn == submitBtn){
-        int pumpSpeed = lv_spinbox_get_value(spinbox);
-        configIntMod("/pump_speed", pumpSpeed);
+        int tuning_speed = lv_spinbox_get_value(spinbox);
+        configIntMod("/pump_speed", tuning_speed);
         pumpSpeed = readConfigValue("/config.json","/pump_speed").toInt();
       }
     }
