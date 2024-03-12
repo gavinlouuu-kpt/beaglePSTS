@@ -36,6 +36,7 @@ lv_obj_t *spinbox;
 lv_style_t border_style;
 lv_style_t popupBox_style;
 lv_obj_t * submitBtn;
+lv_obj_t * OtaBtn;
 lv_obj_t *batLabel;
 lv_obj_t *timeLabel;
 lv_obj_t *device_mac;
@@ -686,6 +687,7 @@ void buildTuning() {
 
   createSubmitButton();
   createPumpSwitch();
+  createOtaButton();
 
   lv_example_spinbox_1();
   
@@ -765,6 +767,9 @@ void createPumpSwitch() {
   PumpSwitch = lv_switch_create(tuning);
   lv_obj_add_event_cb(PumpSwitch, pump_test_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
   lv_obj_align_to(PumpSwitch, spinbox, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+  lv_obj_t * label = lv_label_create(tuning);
+  lv_obj_align_to(label, PumpSwitch, LV_ALIGN_TOP_MID, -20, 0);
+  lv_label_set_text(label, "Pump");
   // lv_obj_add_flag(PumpSwitch, LV_OBJ_FLAG_HIDDEN);
 }
 
@@ -776,6 +781,26 @@ void createSubmitButton() {
     lv_obj_t * label = lv_label_create(submitBtn);
     lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
     lv_label_set_text(label, "Submit");
+}
+
+void createOtaButton() {
+  OtaBtn = lv_btn_create(tuning);
+  lv_obj_set_size(OtaBtn, 100, 30);
+  lv_obj_add_event_cb(OtaBtn, ota_btn_event_cb, LV_EVENT_ALL, NULL);
+  lv_obj_align_to(OtaBtn, PumpSwitch, LV_ALIGN_OUT_BOTTOM_MID, 0, 50);
+  lv_obj_t *label = lv_label_create(OtaBtn); /*Add a label to the button*/
+  lv_label_set_text(label, "OTA");  /*Set the labels text*/
+  lv_obj_center(label);
+}
+
+void ota_btn_event_cb(lv_event_t * e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *btn = lv_event_get_target(e);
+    if(code == LV_EVENT_CLICKED) {
+      if (btn == OtaBtn){
+        fbOTA();
+      }
+    }
 }
 
 

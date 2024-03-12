@@ -37,6 +37,9 @@ void createPumpSwitch();
 void createSubmitButton();
 void submit_btn_event_cb(lv_event_t * e);
 
+void createOtaButton();
+void ota_btn_event_cb(lv_event_t * e);
+
 void check_upload_status(lv_timer_t *timer);
 void updateLocalTime();
 
