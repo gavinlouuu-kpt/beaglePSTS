@@ -512,7 +512,7 @@ void dataFF(void *pvParameters){
     char currentTime[9]; // Buffer to hold the time string
     strftime(currentTime, sizeof(currentTime), "%H_%M_%S", &timeinfo); // Format: HH:MM:SS
 
-    std::string jsonKey = std::string("fields/t") + currentTime;
+    std::string jsonKey = std::string("fields/d") + today + "_t" + currentTime;
     std::string info = jsonKey + "/mapValue/fields/info/stringValue";
     std::string condition = jsonKey + "/mapValue/fields/condition/stringValue";
     std::string data_200 = jsonKey + "/mapValue/fields/data_200/stringValue";
@@ -538,15 +538,15 @@ void dataFF(void *pvParameters){
             // updated path 2024/3/9 GROUP/MAC/DATE/TIME/ GROUP should be read from JSON but now it is hardcoded
             // TIME becomes a document, repeat time again for the fields for distinctive and dynamic fields
     std::string documentPath = macAddressTest + "/" + today;
-    std::string RESTdocuPath = std::string(TARGET_GROUP.c_str()) + "/" + documentPath + "/t" + currentTime;
+    std::string RESTdocuPath = std::string(TARGET_GROUP.c_str()) + "/" + WiFi.macAddress().c_str();
 
             // Here's the critical part: specify the new field in the updateMask
-    std::string updateMask = std::string("t") + currentTime; // This is "fields/<currentTime>"
+    std::string updateMask = std::string("d") + today + "_t" + currentTime; // This is "fields/<currentTime>"
     update_write.update_masks = updateMask;
     // update_write.update_document_path = documentPath.c_str();
     update_write.update_document_path = RESTdocuPath.c_str();
 
-    std::string localPath = documentPath + "/t" + currentTime;
+    std::string localPath = std::string(WiFi.macAddress().c_str()) + "/d_"+ today + "_t" + currentTime;
     localSave(localPath.c_str(), content);
             // Add a write object to a write array.
 
