@@ -768,7 +768,7 @@ void createPumpSwitch() {
   lv_obj_add_event_cb(PumpSwitch, pump_test_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
   lv_obj_align_to(PumpSwitch, spinbox, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
   lv_obj_t * label = lv_label_create(tuning);
-  lv_obj_align_to(label, PumpSwitch, LV_ALIGN_TOP_MID, -20, 0);
+  lv_obj_align_to(label, PumpSwitch, LV_ALIGN_CENTER, -70, 0);
   lv_label_set_text(label, "Pump");
   // lv_obj_add_flag(PumpSwitch, LV_OBJ_FLAG_HIDDEN);
 }
