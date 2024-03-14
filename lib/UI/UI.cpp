@@ -31,8 +31,8 @@ typedef enum {
 } Network_Status_t;
 Network_Status_t networkStatus = NONE;
 
+lv_obj_t *adjustment_container;
 lv_obj_t *spinbox;
-
 lv_style_t border_style;
 lv_style_t popupBox_style;
 lv_obj_t * submitBtn;
@@ -208,7 +208,20 @@ void loadWIFICredentialEEPROM() {
   }
 }
 
+void set_active_screen_bg_black() {
+    lv_obj_t * active_screen = lv_scr_act(); // Get the active screen
+    
+    // Create a new style for the active screen
+    static lv_style_t style_scr;
+    lv_style_init(&style_scr);
+    lv_style_set_bg_color(&style_scr, lv_color_black());
+
+    // Set the new style for the active screen
+    lv_obj_add_style(active_screen, &style_scr, LV_PART_MAIN);
+}
+
 void setStyle() {
+
   lv_style_init(&border_style);
   lv_style_set_border_width(&border_style, 2);
   lv_style_set_border_color(&border_style, lv_color_black());
@@ -227,7 +240,7 @@ lv_style_t style_btn;
   lv_style_set_bg_color(&style_btn, lv_color_hex(0xC5C5C5));
   lv_style_set_bg_opa(&style_btn, LV_OPA_50);
 
-  lv_obj_t *statusBar = lv_obj_create(lv_scr_act());
+  lv_obj_t *statusBar = lv_obj_create(adjustment_container);
   lv_obj_set_size(statusBar, tft.width(), 30);
   lv_obj_align(statusBar, LV_ALIGN_TOP_MID, 0, 0);
 
@@ -451,12 +464,20 @@ void showingFoundWiFiList() {
   foundNetworks = foundWifiList.size();
 }
 
+void buildAdjustment(){
+  adjustment_container = lv_obj_create(lv_scr_act());
+  lv_obj_set_size(adjustment_container, tft.width()*0.954 , tft.height()*0.945);
+  lv_obj_set_pos(adjustment_container, 0, tft.height()*0.038);
+  lv_obj_remove_style(adjustment_container, NULL, LV_PART_SCROLLBAR | LV_STATE_ANY);
 
+
+}
 
 void buildBody() {
-  lv_obj_t *bodyScreen = lv_obj_create(lv_scr_act());
+  // lv_obj_t *bodyScreen = lv_obj_create(lv_scr_act());
+lv_obj_t *bodyScreen = lv_obj_create(adjustment_container);
   lv_obj_add_style(bodyScreen, &border_style, 0);
-  lv_obj_set_size(bodyScreen, tft.width(), tft.height() - 34); //-34
+  lv_obj_set_size(bodyScreen, tft.width()*0.8, tft.height()* 0.6); //-34
   lv_obj_align(bodyScreen, LV_ALIGN_BOTTOM_MID, 0, 0);
 
   lv_obj_remove_style(bodyScreen, NULL, LV_PART_SCROLLBAR | LV_STATE_ANY);

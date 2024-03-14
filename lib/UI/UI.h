@@ -8,6 +8,9 @@ extern TFT_eSPI tft;
 extern lv_obj_t *save_success;
 extern lv_obj_t *save_fail;
 
+void set_active_screen_bg_black();
+void buildAdjustment();
+
 void tryPreviousNetwork();
 void saveWIFICredentialEEPROM(int flag, String ssidpw);
 void loadWIFICredentialEEPROM();

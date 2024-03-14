@@ -266,8 +266,11 @@ void setup()
     // lv_obj_align( label, LV_ALIGN_CENTER, 0, 0 );
     
     // CLI_Call();
-
+    
     setStyle();
+    set_active_screen_bg_black();
+
+    buildAdjustment();
     makeKeyboard();
     buildStatusBar();
     buildPWMsgBox();
