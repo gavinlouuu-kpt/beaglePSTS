@@ -241,7 +241,7 @@ lv_style_t style_btn;
   lv_style_set_bg_opa(&style_btn, LV_OPA_50);
 
   lv_obj_t *statusBar = lv_obj_create(adjustment_container);
-  lv_obj_set_size(statusBar, tft.width(), 30);
+  lv_obj_set_size(statusBar, tft.width()*0.95, tft.height()*0.15);
   lv_obj_align(statusBar, LV_ALIGN_TOP_MID, 0, 0);
 
   lv_obj_remove_style(statusBar, NULL, LV_PART_SCROLLBAR | LV_STATE_ANY);
