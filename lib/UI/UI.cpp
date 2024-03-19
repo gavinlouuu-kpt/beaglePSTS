@@ -241,8 +241,8 @@ lv_style_t style_btn;
   lv_style_set_bg_opa(&style_btn, LV_OPA_50);
 
   lv_obj_t *statusBar = lv_obj_create(adjustment_container);
-  lv_obj_set_size(statusBar, tft.width()*0.95, tft.height()*0.15);
-  lv_obj_align(statusBar, LV_ALIGN_TOP_MID, 0, 0);
+  lv_obj_set_size(statusBar, tft.width()*0.92, tft.height()*0.15);
+  lv_obj_align(statusBar, LV_ALIGN_TOP_MID, 0, -11);
 
   lv_obj_remove_style(statusBar, NULL, LV_PART_SCROLLBAR | LV_STATE_ANY);
 
@@ -428,7 +428,7 @@ void timerForNetwork(lv_timer_t *timer) {
     case NETWORK_CONNECTED_POPUP:
       popupMsgBox("WiFi Connected!", "Now you'll get the current time soon.");
       networkStatus = NETWORK_CONNECTED;
-      configTime(gmtOffset_sec, daylightOffset_sec, "hk.pool.ntp.org","asia.pool.ntp.org","time.nist.gov");
+      configTime(gmtOffset_sec, daylightOffset_sec, "time.nist.gov", "hk.pool.ntp.org","asia.pool.ntp.org");
       firebaseSetup();
       break;
 
@@ -477,8 +477,8 @@ void buildBody() {
   // lv_obj_t *bodyScreen = lv_obj_create(lv_scr_act());
 lv_obj_t *bodyScreen = lv_obj_create(adjustment_container);
   lv_obj_add_style(bodyScreen, &border_style, 0);
-  lv_obj_set_size(bodyScreen, tft.width()*0.8, tft.height()* 0.6); //-34
-  lv_obj_align(bodyScreen, LV_ALIGN_BOTTOM_MID, 0, 0);
+  lv_obj_set_size(bodyScreen, tft.width()*0.92, tft.height()* 0.75); //-34
+  lv_obj_align(bodyScreen, LV_ALIGN_BOTTOM_MID, 0, 12);
 
   lv_obj_remove_style(bodyScreen, NULL, LV_PART_SCROLLBAR | LV_STATE_ANY);
 
@@ -859,7 +859,7 @@ void list_event_handler(lv_event_t *e) {
 void networkScanner() {
   xTaskCreate(scanWIFITask,
               "ScanWIFITask",
-              4096,
+              10240,
               NULL,
               1,
               &ntScanTaskHandler);

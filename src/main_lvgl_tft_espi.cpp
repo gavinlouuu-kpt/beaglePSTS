@@ -277,7 +277,7 @@ void setup()
     buildBody();
     buildSettings();
     delay(10);
-    // tryPreviousNetwork();
+    tryPreviousNetwork();
     networkCheck();
     buildTuning();
     // powerTask();
