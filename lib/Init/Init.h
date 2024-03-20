@@ -20,6 +20,7 @@ extern long gmtOffset_sec;
 extern int daylightOffset_sec;
 extern int FIREBASE_PATH;
 extern String STORAGE_BUCKET_ID;
+extern int COUNT;
 
 
 #endif

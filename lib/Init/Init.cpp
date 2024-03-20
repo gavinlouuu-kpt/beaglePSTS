@@ -18,6 +18,7 @@ int daylightOffset_sec;
 int FIREBASE_PATH;
 String TARGET_GROUP;
 String USER_ID;
+int COUNT;
 
 
 // // LittleFS system
@@ -126,6 +127,7 @@ void configIntMod(const char *path, int value) {
 
 void configInit(){
   ledcWrite(PumpPWM, 0); // turn off pump
+  COUNT = readConfigValue("/config.json", "/COUNT").toInt();
   USER_ID = readConfigValue("/config.json", "/USER_ID");
   TARGET_GROUP = readConfigValue("/config.json", "/TARGET_GROUP");
   FIREBASE_PATH = readConfigValue("/config.json", "/FIREBASE_PATH").toInt();
