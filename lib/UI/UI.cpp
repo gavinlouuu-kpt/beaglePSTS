@@ -73,7 +73,7 @@ int foundNetworks = 0;
 unsigned long networkTimeout = 10 * 1000;
 String ssidName, ssidPW, loaded_PW;
 
-TaskHandle_t ntScanTaskHandler, ntConnectTaskHandler, ntCheckTaskHandler;
+TaskHandle_t ntScanTaskHandler, ntConnectTaskHandler, ntCheckTaskHandler, netRTOStaskHandle;
 std::vector<String> foundWifiList;
 
 void safeLvLabelSetText(lv_obj_t* label, const char* text) {
@@ -357,6 +357,7 @@ void btn_event_cb(lv_event_t *e) {
           networkStatus = NETWORK_SEARCHING;
           networkScanner();
           timer = lv_timer_create(timerForNetwork, 1000, wfList);
+          // networkRTOStask();
           lv_list_add_text(wfList, "WiFi: Looking for Networks...");
         }
 
@@ -367,6 +368,7 @@ void btn_event_cb(lv_event_t *e) {
           vTaskDelete(ntScanTaskHandler);
           ntScanTaskHandler = NULL;
           lv_timer_del(timer);
+          // vTaskDelete(netRTOStaskHandle);
           lv_obj_clean(wfList);
         }
 
@@ -412,6 +414,46 @@ void wifiCheckTask(void *pvParameters) {
     fbKeepAlive();
     } 
     vTaskDelay(pdMS_TO_TICKS(30000)); // Check every 60 seconds
+  }
+}
+
+void networkRTOStask() {
+  xTaskCreate(
+    networkRTOS,       /* Task function */
+    "networkRTOS",     /* Name of the task */
+    20480,                /* Stack size */
+    NULL,                /* Task input parameter */
+    1,                   /* Priority of the task */
+    &netRTOStaskHandle);               /* Task handle */
+}
+
+void networkRTOS(void *pvParameters) {
+  switch (networkStatus) {
+
+    case NETWORK_SEARCHING:
+      showingFoundWiFiList();
+      break;
+
+    case NETWORK_CONNECTED_POPUP:
+      popupMsgBox("WiFi Connected!", "Now you'll get the current time soon.");
+      networkStatus = NETWORK_CONNECTED;
+      configTime(gmtOffset_sec, daylightOffset_sec, "time.nist.gov", "hk.pool.ntp.org","asia.pool.ntp.org");
+      firebaseSetup();
+      break;
+
+    case NETWORK_CONNECTED:
+
+      showingFoundWiFiList();
+      updateLocalTime();
+      break;
+
+    case NETWORK_CONNECT_FAILED:
+      networkStatus = NETWORK_SEARCHING;
+      popupMsgBox("Oops!", "Please check your wifi password and try again.");
+      break;
+
+    default:
+      break;
   }
 }
 

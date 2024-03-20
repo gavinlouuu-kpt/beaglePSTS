@@ -67,4 +67,7 @@ void powerMan(void *pvParameters);
 void saveWIFICredentialsToLittleFS(const char* ssid, const char* password);
 String loadWIFICredentialsFromLittleFS(String ssid);
 
+void networkRTOStask();
+void networkRTOS(void *pvParameters);
+
 #endif // UI_h
