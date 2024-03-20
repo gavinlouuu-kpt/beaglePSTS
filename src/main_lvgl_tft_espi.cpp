@@ -265,8 +265,6 @@ void setup()
     // lv_label_set_text( label, "Hello Ardino and LVGL!");
     // lv_obj_align( label, LV_ALIGN_CENTER, 0, 0 );
     
-    // CLI_Call();
-    
     setStyle();
     set_active_screen_bg_black();
 

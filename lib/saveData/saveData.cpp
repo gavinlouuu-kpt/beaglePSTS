@@ -330,7 +330,7 @@ void firebaseSetup(){
     config.token_status_callback = tokenStatusCallback; // see addons/TokenHelper.h
 
     // Comment or pass false value when WiFi reconnection will control by your code or third party library e.g. WiFiManager
-    Firebase.reconnectNetwork(false);
+    Firebase.reconnectNetwork(true);
 
     // Since v4.4.x, BearSSL engine was used, the SSL buffer need to be set.
     // Large data transmission may require larger RX buffer, otherwise connection issue or data read time out can be occurred.
@@ -352,7 +352,7 @@ void firebaseSetup(){
 
 void fbKeepAlive(){
     fbdo.keepAlive(5, 5, 1);
-    Firebase.ready();
+    // Firebase.ready();
     // Serial.println(fbdo.httpConnected() ? "firebase connected" : "firebase not connected");
 }
 
@@ -566,7 +566,7 @@ void dataFF(void *pvParameters){
     int attempts = 0;
     const int maxAttempts = 5; // Maximum number of retry attempts
     bool success = false;
-
+    Firebase.ready();
     while (!success && attempts < maxAttempts) {
         if (Firebase.Firestore.commitDocument(&fbdo, FIREBASE_PROJECT_ID, "", writes, "")) {
             Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());

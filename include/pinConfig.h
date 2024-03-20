@@ -25,6 +25,8 @@ const int SolenoidPWM = 2; // PWM channel for solenoid valve
 const int PumpFREQ = 20000;
 const int HeaterFREQ = 20000;
 const int SolenoidFREQ = 20000;
+const int LCD_BL_PWM = 3; // PWM channel for LCD backlight
+const int LCD_BL_Freq = 20000;
 const int pwmRES = 8;
 
 #endif // PINCONFIG_H

@@ -27,7 +27,7 @@ bool SensorDataFactory::bme_begin() {
     bme.setHumidityOversampling(BME680_OS_2X);
     bme.setPressureOversampling(BME680_OS_4X);
     bme.setIIRFilterSize(BME680_FILTER_SIZE_1);
-    bme.setGasHeater(450, 5); // 320*C for 150 ms
+    bme.setGasHeater(300, 10); // 320*C for 150 ms
     return true;
 }
 
@@ -97,22 +97,22 @@ void SensorDataFactory::preSampling(){
     auto end = start + std::chrono::seconds(30);
     Serial.println("Warming up sensor: ");
     while(std::chrono::steady_clock::now() < end){
-        bme.setGasHeater(200,5);
-        if(bme.performReading()){
+        // bme.setGasHeater(200,5);
+        // if(bme.performReading()){
             
-            Serial.print(">200_Warming:");
-            Serial.println(bme.gas_resistance);
-        }
-        bme.setGasHeater(300,5);
+        //     Serial.print(">200_Warming:");
+        //     Serial.println(bme.gas_resistance);
+        // }
+        bme.setGasHeater(300,10);
         if(bme.performReading()){
             Serial.print(">300_Warming:");
             Serial.println(bme.gas_resistance);
         }
-        bme.setGasHeater(400,5);
-        if(bme.performReading()){
-            Serial.print(">400_Warming:");
-            Serial.println(bme.gas_resistance);
-        }
+        // bme.setGasHeater(400,5);
+        // if(bme.performReading()){
+        //     Serial.print(">400_Warming:");
+        //     Serial.println(bme.gas_resistance);
+        // }
     }
     warmingInProgress = false;
     readyToSample = true;
@@ -140,25 +140,25 @@ void SensorDataFactory::dataStream(){
     //     // Serial.print(">Humidity:");Serial.println(bme.humidity);//Serial.print(",");
     //     Serial.print(">500 Res:");Serial.println(bme.gas_resistance);
     // }
-        bme.setGasHeater(200,5);
-        if (bme.performReading()) {
-        // Serial.println(bme.temperature);//Serial.print(",");
-        // Serial.print(">Humidity:");Serial.println(bme.humidity);//Serial.print(",");
-        Serial.print(">200 Res:");Serial.println(bme.gas_resistance);
-    }
+    //     bme.setGasHeater(200,5);
+    //     if (bme.performReading()) {
+    //     // Serial.println(bme.temperature);//Serial.print(",");
+    //     // Serial.print(">Humidity:");Serial.println(bme.humidity);//Serial.print(",");
+    //     Serial.print(">200 Res:");Serial.println(bme.gas_resistance);
+    // }
      
-        bme.setGasHeater(300,5);
+        bme.setGasHeater(300,10);
         if (bme.performReading()) {
         // Serial.println(bme.temperature);//Serial.print(",");
         // Serial.print(">Humidity:");Serial.println(bme.humidity);//Serial.print(",");
         Serial.print(">300 Res:");Serial.println(bme.gas_resistance);
     }
-        bme.setGasHeater(400,5);
-        if (bme.performReading()) {
-        // Serial.println(bme.temperature);//Serial.print(",");
-        // Serial.print(">Humidity:");Serial.println(bme.humidity);//Serial.print(",");
-        Serial.print(">400 Res:");Serial.println(bme.gas_resistance);
-    }
+    //     bme.setGasHeater(400,5);
+    //     if (bme.performReading()) {
+    //     // Serial.println(bme.temperature);//Serial.print(",");
+    //     // Serial.print(">Humidity:");Serial.println(bme.humidity);//Serial.print(",");
+    //     Serial.print(">400 Res:");Serial.println(bme.gas_resistance);
+    // }
         
     // if (bme.performReading()) {
     //     bme.setGasHeater(100,5);
@@ -190,24 +190,24 @@ void SensorDataFactory::performSampling(std::vector<float>& conVec, std::vector<
     dataVec400.clear(); 
     Serial.println("Sampling: ");
     while(steady_clock::now() < end){
-        bme.setGasHeater(200,5);
+        // bme.setGasHeater(200,5);
+        // if(bme.performReading()){
+        //     dataVec200.push_back(bme.gas_resistance);
+        //     Serial.print(">200_Sampling:");
+        //     Serial.println(bme.gas_resistance);
+        // }
         if(bme.performReading()){
-            dataVec200.push_back(bme.gas_resistance);
-            Serial.print(">200_Sampling:");
-            Serial.println(bme.gas_resistance);
-        }
-        bme.setGasHeater(300,5);
-        if(bme.performReading()){
+            bme.setGasHeater(300,10);
             dataVec300.push_back(bme.gas_resistance);
             Serial.print(">300_Sampling:");
             Serial.println(bme.gas_resistance);
         }
-        bme.setGasHeater(400,5);
-        if(bme.performReading()){
-            dataVec400.push_back(bme.gas_resistance);
-            Serial.print(">400_Sampling:");
-            Serial.println(bme.gas_resistance);
-        }
+        // bme.setGasHeater(400,5);
+        // if(bme.performReading()){
+        //     dataVec400.push_back(bme.gas_resistance);
+        //     Serial.print(">400_Sampling:");
+        //     Serial.println(bme.gas_resistance);
+        // }
     }
     auto now = std::chrono::steady_clock::now();
     std::chrono::duration<float> duration = now - start;
@@ -229,22 +229,23 @@ void SensorDataFactory::waitUser(){
 
     while(!samplingInProgress){
         // Sleep for a short duration to prevent busy waiting
-                bme.setGasHeater(200,5);
-        if(bme.performReading()){
+        //         bme.setGasHeater(200,5);
+        // if(bme.performReading()){
             
-            Serial.print(">200_Warming:");
-            Serial.println(bme.gas_resistance);
-        }
-        bme.setGasHeater(300,5);
+        //     Serial.print(">200_Warming:");
+        //     Serial.println(bme.gas_resistance);
+        // }
+        
         if(bme.performReading()){
+            bme.setGasHeater(300,10);
             Serial.print(">300_Warming:");
             Serial.println(bme.gas_resistance);
         }
-        bme.setGasHeater(400,5);
-        if(bme.performReading()){
-            Serial.print(">400_Warming:");
-            Serial.println(bme.gas_resistance);
-        }
+        // bme.setGasHeater(400,5);
+        // if(bme.performReading()){
+        //     Serial.print(">400_Warming:");
+        //     Serial.println(bme.gas_resistance);
+        // }
         // std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
