@@ -117,7 +117,7 @@ void firebaseSetup(){
 
     // Since v4.4.x, BearSSL engine was used, the SSL buffer need to be set.
     // Large data transmission may require larger RX buffer, otherwise connection issue or data read time out can be occurred.
-    fbdo.setBSSLBufferSize(4096 /* Rx buffer size in bytes from 512 - 16384 */, 1024 /* Tx buffer size in bytes from 512 - 16384 */);
+    fbdo.setBSSLBufferSize(10240 /* Rx buffer size in bytes from 512 - 16384 */, 10240 /* Tx buffer size in bytes from 512 - 16384 */);
 
     // Limit the size of response payload to be collected in FirebaseData
     fbdo.setResponseSize(2048);
@@ -135,7 +135,7 @@ void firebaseSetup(){
 
 void fbKeepAlive(){
     fbdo.keepAlive(5, 5, 1);
-    // Firebase.ready();
+    Firebase.ready();
     // Serial.println(fbdo.httpConnected() ? "firebase connected" : "firebase not connected");
 }
 
@@ -280,7 +280,7 @@ void dataFF(void *pvParameters){
     
     vTaskDelay(10);
     localSave(localPath.c_str(), content);
-    configIntMod("/COUNT", COUNT + 1);
+    configIntMod("/FIREBASE_PATH", COUNT + 1);
 
     // writes.push_back(update_write);
 

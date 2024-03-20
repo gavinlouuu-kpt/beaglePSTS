@@ -273,7 +273,7 @@ void setup()
     buildStatusBar();
     buildPWMsgBox();
     buildBody();
-    // buildSettings();
+    buildSettings();
     delay(10);
     // tryPreviousNetwork();
     networkCheck();

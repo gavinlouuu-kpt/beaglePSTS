@@ -249,14 +249,14 @@ lv_style_t style_btn;
   timeLabel = lv_label_create(statusBar);
   lv_obj_set_size(timeLabel, tft.width() - 50, 30);
 
-  lv_label_set_text(timeLabel, "WiFi Not Connected!  ");
+  lv_label_set_text(timeLabel, "WiFi Not Needed!  ");
   lv_obj_align(timeLabel, LV_ALIGN_LEFT_MID, 2, 7);
-  lv_obj_add_flag(timeLabel, LV_OBJ_FLAG_HIDDEN); // hide time when there is no wifi fx
+  // lv_obj_add_flag(timeLabel, LV_OBJ_FLAG_HIDDEN); // hide time when there is no wifi fx
 
   settingBtn = lv_btn_create(statusBar);
   lv_obj_set_size(settingBtn, 30, 30);
   lv_obj_align(settingBtn, LV_ALIGN_RIGHT_MID, 0, 0);
-  lv_obj_add_flag(settingBtn, LV_OBJ_FLAG_HIDDEN);
+  // lv_obj_add_flag(settingBtn, LV_OBJ_FLAG_HIDDEN);
 
   testingBtn = lv_btn_create(statusBar);
   lv_obj_set_size(testingBtn, 30, 30);
