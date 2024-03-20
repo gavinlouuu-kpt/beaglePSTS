@@ -280,7 +280,7 @@ void dataFF(void *pvParameters){
     
     vTaskDelay(10);
     localSave(localPath.c_str(), content);
-    configIntMod("/FIREBASE_PATH", COUNT + 1);
+    configIntMod("/COUNT", COUNT + 1);
 
     // writes.push_back(update_write);
 
