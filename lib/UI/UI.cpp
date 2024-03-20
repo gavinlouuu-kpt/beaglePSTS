@@ -251,6 +251,7 @@ lv_style_t style_btn;
 
   lv_label_set_text(timeLabel, "WiFi Not Connected!  ");
   lv_obj_align(timeLabel, LV_ALIGN_LEFT_MID, 2, 7);
+  lv_obj_add_flag(timeLabel, LV_OBJ_FLAG_HIDDEN); // hide time when there is no wifi fx
 
   settingBtn = lv_btn_create(statusBar);
   lv_obj_set_size(settingBtn, 30, 30);
@@ -609,11 +610,12 @@ void check_upload_status(lv_timer_t * timer) {
     toggle_visibility(spinner_save, uploadInProgress);
     // toggle_visibility(db_settingBtn, !busy); // Note the negation here, as the logic is reversed
     toggle_visibility(samplingBtn, readyToSample);
-    if (WiFi.status() != WL_CONNECTED) {
-      lv_obj_add_flag(db_settingBtn, LV_OBJ_FLAG_HIDDEN);
-    } else {
-      toggle_visibility(db_settingBtn, !busy);
-    }
+    // if (WiFi.status() != WL_CONNECTED) {
+    //   lv_obj_add_flag(db_settingBtn, LV_OBJ_FLAG_HIDDEN);
+    // } else {
+    //   toggle_visibility(db_settingBtn, !busy);
+    // }
+    toggle_visibility(db_settingBtn, !busy);
     
 }
 
