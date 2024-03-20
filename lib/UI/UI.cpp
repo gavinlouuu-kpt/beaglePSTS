@@ -255,10 +255,12 @@ lv_style_t style_btn;
   settingBtn = lv_btn_create(statusBar);
   lv_obj_set_size(settingBtn, 30, 30);
   lv_obj_align(settingBtn, LV_ALIGN_RIGHT_MID, 0, 0);
+  lv_obj_add_flag(settingBtn, LV_OBJ_FLAG_HIDDEN);
 
   testingBtn = lv_btn_create(statusBar);
   lv_obj_set_size(testingBtn, 30, 30);
   lv_obj_align(testingBtn, LV_ALIGN_RIGHT_MID, -35, 0);
+  lv_obj_add_flag(testingBtn, LV_OBJ_FLAG_HIDDEN);
 
   tuningBtn = lv_btn_create(statusBar);
   lv_obj_set_size(tuningBtn, 30, 30);
@@ -358,6 +360,7 @@ void btn_event_cb(lv_event_t *e) {
           networkScanner();
           timer = lv_timer_create(timerForNetwork, 1000, wfList);
           lv_list_add_text(wfList, "WiFi: Looking for Networks...");
+
         }
 
       } else {
@@ -409,7 +412,7 @@ void wifiCheckTask(void *pvParameters) {
   for (;;) {
     batRead(); // utilise minute timer to read battery level
     if (WiFi.status() == WL_CONNECTED) {
-    fbKeepAlive();
+    // fbKeepAlive();
     } 
     vTaskDelay(pdMS_TO_TICKS(30000)); // Check every 60 seconds
   }

@@ -480,6 +480,7 @@ volatile bool uploadInProgress = false;
 
 UploadState uploadState = NotStarted;
 
+
 void dataFF(void *pvParameters){
     Serial.println("Enter dataFF");
     
@@ -487,19 +488,16 @@ void dataFF(void *pvParameters){
     SensorData sensorData = factory.createSensorData();
     
     uploadInProgress = true;
-        // dataMillis = millis();
 
-            // For the usage of FirebaseJson, see examples/FirebaseJson/BasicUsage/Create_Edit_Parse/Create_Edit_Parse.ino
-            // The dyamic array of write object firebase_firestore_document_write_t.
     std::vector<struct firebase_firestore_document_write_t> writes;
-            // A write object that will be written to the document.
+
     struct firebase_firestore_document_write_t update_write;
     update_write.type = firebase_firestore_document_write_type_update;
-            // Set the document content to write (transform)
             
     FirebaseJson content;
     std::string macAddressTest = WiFi.macAddress().c_str();
-            // obtain date
+            
+    // obtain date
     struct tm timeinfo;
     if (!getLocalTime(&timeinfo)) {
         Serial.println("Failed to obtain time");
@@ -550,18 +548,8 @@ void dataFF(void *pvParameters){
     
     vTaskDelay(10);
     localSave(localPath.c_str(), content);
-            // Add a write object to a write array.
 
     writes.push_back(update_write);
-
-    // if (Firebase.Firestore.commitDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, writes /* dynamic array of firebase_firestore_document_write_t */, "" /* transaction */)){
-    //     Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
-    //     uploadState = Success;
-    // }   
-    // else{
-    //     Serial.println(fbdo.errorReason());
-    //     uploadState = Failure;
-    // }
 
     int attempts = 0;
     const int maxAttempts = 5; // Maximum number of retry attempts
@@ -586,55 +574,9 @@ void dataFF(void *pvParameters){
         // Consider a fallback or notification mechanism
     }
 
-    // if (FIREBASE_PATH == 0){
-        
-    //     // The dyamic array of write object firebase_firestore_document_write_t.
-    //     std::vector<struct firebase_firestore_document_write_t> writes_init;
-    //     // A write object that will be written to the document.
-    //     struct firebase_firestore_document_write_t update_write_init;
-    //     update_write_init.type = firebase_firestore_document_write_type_update;
-    //     // Set the document content to write (transform)
-
-    //     FirebaseJson pathInit;
-    //     std::string path_to_init = std::string(TARGET_GROUP.c_str()) + "/" + macAddressTest;
-    //     std::string initKey = "fields/reset_" + std::string(today) + "/stringValue/";
-    //     pathInit.set(initKey, USER_ID);
-
-    //     update_write_init.update_document_content = pathInit.raw();
-
-    //     std::string initMask = "reset_" + std::string(today); // double check: it should be masking the field not document
-    //     update_write_init.update_masks = initMask;
-    //     update_write_init.update_document_path = path_to_init.c_str();
-
-    //     writes_init.push_back(update_write_init);
-    //     int init_attempts = 0;
-    //     const int max_init_Attempts = 3; // Maximum number of retry attempts
-    //     bool init_success = false;
-
-    //     while (!init_success && init_attempts < max_init_Attempts) {
-    //     if (Firebase.Firestore.commitDocument(&fbdo, FIREBASE_PROJECT_ID, "", writes_init, "")) {
-    //         Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
-    //         // uploadState = Success;
-    //         init_success = true;
-    //         configIntMod("/FIREBASE_PATH", 1);
-
-    //     } else {
-    //         Serial.println(fbdo.errorReason());
-    //         // uploadState = Failure;
-    //         attempts++;
-    //         delay(1000); // Wait for 1 second before retrying
-    //     }
-    // }
-
-    // } 
 
     updateUploadState(NULL);
         
-            // if (Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, documentPath.c_str(), content.raw(), updateMask /* updateMask */))
-            //     Serial.println("ok");
-                
-            // else
-            //     Serial.println(fbdo.errorReason());
     busy = false;
     uploadInProgress = false;
     UBaseType_t uxHighWaterMark;
@@ -643,6 +585,113 @@ void dataFF(void *pvParameters){
     Serial.println(uxHighWaterMark);
     vTaskDelete(fsUploadTaskHandler);
 }
+
+//--- upload ---
+
+// void dataFF(void *pvParameters){
+//     Serial.println("Enter dataFF");
+    
+//     SensorDataFactory factory;
+//     SensorData sensorData = factory.createSensorData();
+    
+//     uploadInProgress = true;
+
+//     std::vector<struct firebase_firestore_document_write_t> writes;
+
+//     struct firebase_firestore_document_write_t update_write;
+//     update_write.type = firebase_firestore_document_write_type_update;
+            
+//     FirebaseJson content;
+//     std::string macAddressTest = WiFi.macAddress().c_str();
+            
+//     // obtain date
+//     struct tm timeinfo;
+//     if (!getLocalTime(&timeinfo)) {
+//         Serial.println("Failed to obtain time");
+//         return;
+//     }
+
+//     char today[11]; // Buffer to hold the date string
+//     strftime(today, sizeof(today), "%Y_%m_%d", &timeinfo); // Format: YYYY-MM-DD
+
+//     char currentTime[9]; // Buffer to hold the time string
+//     strftime(currentTime, sizeof(currentTime), "%H_%M_%S", &timeinfo); // Format: HH:MM:SS
+
+//     std::string jsonKey = std::string("fields/d") + today + "_t" + currentTime;
+//     std::string info = jsonKey + "/mapValue/fields/info/stringValue";
+//     std::string condition = jsonKey + "/mapValue/fields/condition/stringValue";
+//     std::string data_200 = jsonKey + "/mapValue/fields/data_200/stringValue";
+//     std::string data_300 = jsonKey + "/mapValue/fields/data_300/stringValue";
+//     std::string data_400 = jsonKey + "/mapValue/fields/data_400/stringValue";
+            
+//     std::string infoString = sensorData.getInfoString();
+//     std::string conString = vectorToString(sensorData.getConVec()); 
+//     std::string dataString_200 = vectorToString(sensorData.getDataVec200()); 
+//     std::string dataString_300 = vectorToString(sensorData.getDataVec300()); 
+//     std::string dataString_400 = vectorToString(sensorData.getDataVec400()); 
+            
+//     content.set(info, infoString.c_str());
+//     content.set(condition, conString.c_str());
+//     content.set(data_200, dataString_200.c_str());
+//     content.set(data_300, dataString_300.c_str());
+//     content.set(data_400, dataString_400.c_str());
+
+//     update_write.update_document_content = content.raw();
+
+
+//             // info is the collection id, countries is the document id in collection info.
+//             // updated path 2024/3/9 GROUP/MAC/DATE/TIME/ GROUP should be read from JSON but now it is hardcoded
+//             // TIME becomes a document, repeat time again for the fields for distinctive and dynamic fields
+//     std::string documentPath = macAddressTest + "/" + today;
+//     std::string RESTdocuPath = std::string(TARGET_GROUP.c_str()) + "/" + WiFi.macAddress().c_str();
+
+//             // Here's the critical part: specify the new field in the updateMask
+//     std::string updateMask = std::string("d") + today + "_t" + currentTime; // This is "fields/<currentTime>"
+//     update_write.update_masks = updateMask;
+//     // update_write.update_document_path = documentPath.c_str();
+//     update_write.update_document_path = RESTdocuPath.c_str();
+
+//     std::string localPath = std::string(WiFi.macAddress().c_str()) + "/d_"+ today + "_t" + currentTime;
+    
+//     vTaskDelay(10);
+//     localSave(localPath.c_str(), content);
+
+//     writes.push_back(update_write);
+
+//     int attempts = 0;
+//     const int maxAttempts = 5; // Maximum number of retry attempts
+//     bool success = false;
+//     Firebase.ready();
+//     while (!success && attempts < maxAttempts) {
+//         if (Firebase.Firestore.commitDocument(&fbdo, FIREBASE_PROJECT_ID, "", writes, "")) {
+//             Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+//             uploadState = Success;
+//             success = true;
+//             vTaskDelay(10);
+//         } else {
+//             Serial.println(fbdo.errorReason());
+//             uploadState = Failure;
+//             attempts++;
+//             vTaskDelay(5000);
+//         }
+//     }
+
+//     if (!success) {
+//         Serial.println("Failed to commit document after multiple attempts.");
+//         // Consider a fallback or notification mechanism
+//     }
+
+
+//     updateUploadState(NULL);
+        
+//     busy = false;
+//     uploadInProgress = false;
+//     UBaseType_t uxHighWaterMark;
+//     uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+//     Serial.print("Minimum free stack for dataFF task: ");
+//     Serial.println(uxHighWaterMark);
+//     vTaskDelete(fsUploadTaskHandler);
+// }
 
 
 void CreateTest(){
